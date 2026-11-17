@@ -12,6 +12,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Validate skill structure and references
         run: python3 scripts/validate_skill.py
+      - name: Validator missing-file regressions
+        run: python3 -m unittest discover -s tests -p "test_validate_skill.py" -v
   installer-linux:
     runs-on: ubuntu-latest
     permissions:

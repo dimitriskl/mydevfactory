@@ -53,6 +53,7 @@ if ($root -notmatch '^https?://') {
 }
 $tmp = Join-Path ([IO.Path]::GetTempPath()) ("ej-update-" + [guid]::NewGuid().ToString("n"))
 New-Item -ItemType Directory -Force -Path $tmp | Out-Null
+try {
 $base = "$root/dimitriskl/mydevfactory/$ref/install"
 function Save-Pinned([string]$Url, [string]$Dest, [string]$Label) {
     try {
@@ -72,4 +73,8 @@ $installer = Join-Path $tmp "install.ps1"
 if ($null -ne $LASTEXITCODE -and $LASTEXITCODE -ne 0) {
     if ($RanAsFile) { exit $LASTEXITCODE }
     throw "Installer failed with exit code $LASTEXITCODE."
+}
+} finally {
+    # The piped updater downloads installer files into this folder. Clean up on success and failure.
+    Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue
 }

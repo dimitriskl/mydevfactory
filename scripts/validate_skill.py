@@ -66,7 +66,7 @@ REQUIRED = {
         "Change request by", "approved without viewing steps", "## Sign-off", "ACCEPT", "REJECT",
     ],
     "skills/mydevfactory/SKILL.md": [
-        'version: "3.5.0"', "human-on-the-loop", "`Walkthrough`", "references/kanban-protocol.md",
+        'version: "3.5.1"', "human-on-the-loop", "`Walkthrough`", "references/kanban-protocol.md",
         "references/analyst-playbook.md", "references/walkthrough.md", "templates/prd.md",
         "templates/slice.md", "fresh agent", "Developer sign-off", "only in Drill",
     ],
@@ -137,10 +137,10 @@ for scope in ("skills", "README.md", "examples"):
 # Brackets are mandatory, also for the orchestrator; global installs update with -g.
 REQUIRED["skills/mydevfactory/SKILL.md"] += ["Never omit the brackets", "⚪ orchestrator [session]:"]
 REQUIRED["README.md"] += ["npx skills update -g"]
-_skill_text = (root / "skills/mydevfactory/SKILL.md").read_text(encoding="utf-8")
+_skill_text = main.read_text(encoding="utf-8") if main.is_file() else ""
 if "`⚪ orchestrator:` if you don't know" in _skill_text:
     errors.append("SKILL.md still allows an orchestrator label without brackets")
-for f in sorted((root / "skills").rglob("*.md")) + [root / "README.md"] + sorted((root / "examples").rglob("*.md")):
+for f in sorted((root / "skills").rglob("*.md")) + ([root / "README.md"] if (root / "README.md").is_file() else []) + sorted((root / "examples").rglob("*.md")):
     for n, line in enumerate(f.read_text(encoding="utf-8").splitlines(), 1):
         if "⚪ orchestrator:" in line:
             errors.append(f"{f.relative_to(root).as_posix()}:{n} orchestrator label without brackets")
@@ -149,7 +149,7 @@ REQUIRED["install/agents.txt"] = ["requirements-analyst", "csharp-expert-develop
                                   "qa-automation-engineer", "senior-code-reviewer"]
 REQUIRED["install/install.sh"] = ["install/agents.txt", "install/pins.txt", "skills add", "install-scope", "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE", "model_auto_compact_token_limit", "Node.js 22.20", "Rerunning is safe.", ".bak-"]
 REQUIRED["install/install.ps1"] = REQUIRED["install/install.sh"]
-REQUIRED["README.md"] += ["install/install.ps1 | iex", "install/install.sh | bash", "install/pins.txt", "v3.5.0", "tests/installer_e2e.sh", "tests/installer_e2e.ps1"]
+REQUIRED["README.md"] += ["install/install.ps1 | iex", "install/install.sh | bash", "install/pins.txt", "v3.5.1", "tests/installer_e2e.sh", "tests/installer_e2e.ps1"]
 # Locations are clickable (path:line from the repo root) and the Walkthrough moves the editor to each step.
 REQUIRED["skills/mydevfactory/SKILL.md"] += ["path/from/repo/root.ext:line"]
 REQUIRED["skills/mydevfactory/references/walkthrough.md"] += [
@@ -215,11 +215,10 @@ else:
     if not re.fullmatch(r"\d+\.\d+\.\d+", version):
         errors.append(f"VERSION is not major.minor.patch: {version}")
     else:
-        skill_text = (root / "skills/mydevfactory/SKILL.md").read_text(encoding="utf-8")
-        changelog = (root / "CHANGELOG.md").read_text(encoding="utf-8")
-        if f'version: "{version}"' not in skill_text:
+        if skill_md.is_file() and f'version: "{version}"' not in _skill_text:
             errors.append("SKILL.md metadata version does not match VERSION")
-        if f"## {version} " not in changelog:
+        changelog_path = root / "CHANGELOG.md"
+        if changelog_path.is_file() and f"## {version} " not in changelog_path.read_text(encoding="utf-8"):
             errors.append("CHANGELOG.md has no heading for VERSION")
 pins_path = root / "install/pins.txt"
 agents_path = root / "install/agents.txt"
@@ -260,7 +259,11 @@ if agents_path.is_file() and agents:
     if set(listed) != set(agents):
         errors.append("install/agents.txt and install/pins.txt list different agents")
 for rel in ("install/install.sh", "install/install.ps1", "install/update.sh", "install/update.ps1"):
-    text = (root / rel).read_text(encoding="utf-8")
+    path = root / rel
+    if not path.is_file():
+        errors.append(f"Missing file: {rel}")
+        continue
+    text = path.read_text(encoding="utf-8")
     if re.search(r"/main(?:/|[\"'\s]|$)", text):
         errors.append(f"{rel} still references a /main ref")
 if (root / "docs/task-cards/latest-anthropic-models.md").exists():
