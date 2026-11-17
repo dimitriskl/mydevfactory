@@ -253,6 +253,24 @@ Assert-Status $code 1 "piped update.ps1 without --ref exits 1" $c
 Assert-Has $c.Err "update.ps1 was started from a pipe" "piped update.ps1 explains the pipe"
 Assert-Clean $c.Home "piped update.ps1 writes nothing"
 
+# A piped update that fails downloading must remove the temporary installer directory.
+$c = New-Case
+$beforeUpdateTmp = @(
+    Get-ChildItem -LiteralPath ([IO.Path]::GetTempPath()) -Directory -Filter "ej-update-*" -ErrorAction SilentlyContinue |
+        ForEach-Object { $_.FullName }
+)
+$code = Invoke-Install $c $Update @() @{ EJ_REF = (Hub-Sha); EJ_RAW_ROOT = "http://127.0.0.1:9" } $null "pipe"
+Assert-Status $code 1 "piped update download failure exits 1" $c
+Assert-Has $c.Err "Failed to download install/install.ps1" "piped update explains download failure"
+$leftovers = @(
+    Get-ChildItem -LiteralPath ([IO.Path]::GetTempPath()) -Directory -Filter "ej-update-*" -ErrorAction SilentlyContinue |
+        Where-Object { $beforeUpdateTmp -notcontains $_.FullName }
+)
+if ($leftovers.Count -eq 0) { Ok "failed piped update cleans temporary downloads" } else {
+    Bad "failed piped update left temporary downloads"
+    $leftovers | ForEach-Object { Write-Output $_.FullName }
+}
+
 $c = New-Case
 $scopeDir = Join-Path $c.Home ".engineering-judgment"
 New-Item -ItemType Directory -Force -Path $scopeDir | Out-Null
