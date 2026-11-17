@@ -220,6 +220,19 @@ assert_status "piped update.sh without --ref exits 1" 1 "$OUT" "$ERR"
 assert_grep "$ERR" "update.sh was started from a pipe" "piped update.sh explains the pipe"
 clean_tree "$HOME_DIR" "piped update.sh writes nothing"
 
+# A piped update that fails downloading must remove its temporary installer directory.
+new_case
+mkdir -p "$CASE/update-temp"
+launch "$HOME_DIR" "$WORK" "$OUT" "$ERR" env TMPDIR="$CASE/update-temp" EJ_RAW_ROOT="http://127.0.0.1:9" bash -c "$(cat "$UPDATE")" bash --ref "$(hub_sha)"
+assert_status "piped update download failure exits 1" 1 "$OUT" "$ERR"
+assert_grep "$ERR" "Failed to download install/install.sh" "piped update explains download failure"
+if [ -z "$(find "$CASE/update-temp" -mindepth 1 -print -quit)" ]; then
+  ok "failed piped update cleans temporary downloads"
+else
+  bad "failed piped update left temporary downloads"
+  find "$CASE/update-temp" -mindepth 1 -maxdepth 2 -print
+fi
+
 new_case
 mkdir -p "$HOME_DIR/.engineering-judgment"
 printf '%s\n' project > "$HOME_DIR/.engineering-judgment/install-scope"
