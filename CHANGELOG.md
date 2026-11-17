@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.5.1 — Updater cleanup and validation hardening (2026-11-17)
+
+- Remove downloaded installer temporary directories after piped Bash and PowerShell updates, on both success and failure.
+- Clarify the difference between installer-managed and direct Agent Skills CLI updates in the README.
+- Make the validator report missing critical files instead of crashing with a Python traceback.
+- Add regression checks for updater cleanup and validator missing-file handling.
+
 ## 3.5.0 — Reproducible installs (2026-11-10)
 
 - Pin the hub and all eight agents to full commit SHAs in `install/pins.txt`, shared by the bash and PowerShell installers. Fetches no longer follow `main`. `--ref` or `EJ_REF` overrides the hub ref. A branch or tag, including a branch name that contains a slash, is resolved to a commit SHA first.
