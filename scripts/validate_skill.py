@@ -149,7 +149,7 @@ REQUIRED["install/agents.txt"] = ["requirements-analyst", "csharp-expert-develop
                                   "qa-automation-engineer", "senior-code-reviewer"]
 REQUIRED["install/install.sh"] = ["install/agents.txt", "install/pins.txt", "skills add", "install-scope", "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE", "model_auto_compact_token_limit", "Node.js 22.20", "Rerunning is safe.", ".bak-"]
 REQUIRED["install/install.ps1"] = REQUIRED["install/install.sh"]
-REQUIRED["README.md"] += ["install/install.ps1 | iex", "install/install.sh | bash", "install/pins.txt", "v3.5.0", "tests/installer_e2e.sh", "tests/installer_e2e.ps1"]
+REQUIRED["README.md"] += ["install/install.ps1 | iex", "install/install.sh | bash", "install/pins.txt", "v3.5.1", "tests/installer_e2e.sh", "tests/installer_e2e.ps1"]
 # Locations are clickable (path:line from the repo root) and the Walkthrough moves the editor to each step.
 REQUIRED["skills/mydevfactory/SKILL.md"] += ["path/from/repo/root.ext:line"]
 REQUIRED["skills/mydevfactory/references/walkthrough.md"] += [
