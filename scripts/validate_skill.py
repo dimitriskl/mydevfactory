@@ -137,7 +137,7 @@ for scope in ("skills", "README.md", "examples"):
 # Brackets are mandatory, also for the orchestrator; global installs update with -g.
 REQUIRED["skills/mydevfactory/SKILL.md"] += ["Never omit the brackets", "⚪ orchestrator [session]:"]
 REQUIRED["README.md"] += ["npx skills update -g"]
-_skill_text = skill_md.read_text(encoding="utf-8") if skill_md.is_file() else ""
+_skill_text = main.read_text(encoding="utf-8") if main.is_file() else ""
 if "`⚪ orchestrator:` if you don't know" in _skill_text:
     errors.append("SKILL.md still allows an orchestrator label without brackets")
 for f in sorted((root / "skills").rglob("*.md")) + ([root / "README.md"] if (root / "README.md").is_file() else []) + sorted((root / "examples").rglob("*.md")):
