@@ -45,6 +45,7 @@ command -v curl >/dev/null 2>&1 || {
 }
 
 tmp="$(mktemp -d)"
+trap 'rm -rf -- "$tmp"' EXIT
 base="${root}/dimitriskl/mydevfactory/${ref}/install"
 fetch() {
   err="$(mktemp)"
@@ -69,5 +70,5 @@ fetch() {
 fetch "$base/install.sh" "$tmp/install.sh" "install/install.sh"
 fetch "$base/pins.txt" "$tmp/pins.txt" "install/pins.txt"
 fetch "$base/agents.txt" "$tmp/agents.txt" "install/agents.txt"
-# exec keeps the temp files for the installer, which reads pins.txt beside itself.
-exec bash "$tmp/install.sh" "$@"
+# Run as a child so the EXIT trap removes downloaded files even if installation fails.
+bash "$tmp/install.sh" "$@"
