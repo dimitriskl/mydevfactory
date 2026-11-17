@@ -19,19 +19,19 @@ Upgrading from `engineering-judgment` or 3.4? See the [migration note](#manual-i
 
 ```bash
 # Linux and macOS
-curl -fsSL https://raw.githubusercontent.com/dimitriskl/mydevfactory/v3.5.0/install/install.sh | bash -s -- --ref v3.5.0
+curl -fsSL https://raw.githubusercontent.com/dimitriskl/mydevfactory/v3.5.1/install/install.sh | bash -s -- --ref v3.5.1
 ```
 
 ```powershell
 # Windows (PowerShell)
-$env:EJ_REF = 'v3.5.0'
-irm https://raw.githubusercontent.com/dimitriskl/mydevfactory/v3.5.0/install/install.ps1 | iex
+$env:EJ_REF = 'v3.5.1'
+irm https://raw.githubusercontent.com/dimitriskl/mydevfactory/v3.5.1/install/install.ps1 | iex
 ```
 
 Only want the skill?
 
 ```bash
-npx skills add https://github.com/dimitriskl/mydevfactory/tree/v3.5.0 --skill mydevfactory
+npx skills add https://github.com/dimitriskl/mydevfactory/tree/v3.5.1 --skill mydevfactory
 ```
 
 Then open a **new agent session** and invoke the skill: `/mydevfactory` in Claude Code, `$mydevfactory` in Codex. To try it on a first feature, see [First feature: add 2FA to login](#first-feature-add-2fa-to-login).
@@ -41,7 +41,7 @@ Then open a **new agent session** and invoke the skill: `/mydevfactory` in Claud
 Prefer to read the script first? Clone the tag anywhere, then run it **from your project folder**:
 
 ```bash
-git clone --branch v3.5.0 https://github.com/dimitriskl/mydevfactory.git ~/src/mydevfactory
+git clone --branch v3.5.1 https://github.com/dimitriskl/mydevfactory.git ~/src/mydevfactory
 cd /path/to/your/project
 bash ~/src/mydevfactory/install/install.sh      # or: pwsh -File ~/src/mydevfactory/install/install.ps1
 ```
@@ -382,7 +382,7 @@ Example (macOS/Linux):
 
 ```bash
 git clone https://github.com/dimitriskl/mydevfactory.git
-git -C mydevfactory checkout v3.5.0
+git -C mydevfactory checkout v3.5.1
 mkdir -p YourProject/.agents/skills
 cp -R mydevfactory/skills/mydevfactory YourProject/.agents/skills/
 ```
@@ -391,7 +391,7 @@ Example (PowerShell):
 
 ```powershell
 git clone https://github.com/dimitriskl/mydevfactory.git
-git -C mydevfactory checkout v3.5.0
+git -C mydevfactory checkout v3.5.1
 New-Item -ItemType Directory -Force C:\src\YourProject\.claude\skills | Out-Null
 Copy-Item -Recurse .\mydevfactory\skills\mydevfactory C:\src\YourProject\.claude\skills\
 ```
@@ -404,22 +404,22 @@ Use the corresponding destination for your agent. Restart its session, then invo
 
 Check [CHANGELOG.md](CHANGELOG.md) first. A new major version (for example 2.x → 3.0.0) can change how the skill works or what `.engineering-workflow.json` contains.
 
-**Update the skill and all agents together** (Node.js 22.20 or later), from tag `v3.5.0`:
+**If you installed with the MyDevFactory installer**, update the skill **and all eight pinned agents** using the matching updater (Node.js 22.20 or later), from tag `v3.5.1`:
 
 ```powershell
-$env:EJ_REF = 'v3.5.0'
-irm https://raw.githubusercontent.com/dimitriskl/mydevfactory/v3.5.0/install/update.ps1 | iex
+$env:EJ_REF = 'v3.5.1'
+irm https://raw.githubusercontent.com/dimitriskl/mydevfactory/v3.5.1/install/update.ps1 | iex
 ```
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/dimitriskl/mydevfactory/v3.5.0/install/update.sh | bash -s -- --ref v3.5.0
+curl -fsSL https://raw.githubusercontent.com/dimitriskl/mydevfactory/v3.5.1/install/update.sh | bash -s -- --ref v3.5.1
 ```
 
 From a checkout of that tag, run `bash install/update.sh` or `pwsh -File install/update.ps1` **from your project folder**, not from the skill checkout. The updater runs the installer again and reuses the saved personal scope, or the project scope remembered in the current folder. If you used project scope before 3.5.0, that choice was saved for every folder; run once with `--scope project` in the project you want (or `--scope personal`). To select a scope, set `$env:EJ_SCOPE = 'personal'` or `'project'` in PowerShell, or use `--scope project`. Changed agent files are backed up as `<file>.bak-YYYYMMDD-HHMMSS` (UTC) and older backups are kept. Existing workflow configuration and auto-compact values are kept. Missing skill or agent files are installed. The installer may add missing configuration and auto-compact settings as described in the 30-second start.
 
 The installer records the installed skill repository and resolved commit in `.engineering-judgment/skill-pin.json` under the chosen scope. Use the installer or updater above to update this skill: generic `skills update` does not track its temporary checkout. The receipt describes the last successful skill installation; it does not verify later local edits.
 
-**Installed with `npx skills`** (Node.js 22.20 or later):
+**If you installed directly with `npx skills add` (not the MyDevFactory installer)** (Node.js 22.20 or later), use the Agent Skills CLI to check or update the skill only. These commands do **not** update the eight agent definitions installed by the MyDevFactory installer:
 
 ```bash
 npx skills check                          # shows whether an update is available
@@ -427,7 +427,7 @@ npx skills update mydevfactory    # updates a project install (run it in your pr
 npx skills update -g                      # updates global installs (e.g. ~/.agents/skills)
 ```
 
-Run in a project folder, `update` may update only that project's skills. If you installed the skill globally (with `-g`), use `npx skills update -g`. A session that is already running keeps the old instructions, so start a new one after updating.
+Run in a project folder for project-scoped installs, or use `-g` for direct global installs. **Do not use these generic `npx skills update` commands to update an installer-managed MyDevFactory installation:** it uses a temporary checkout and a separate pin receipt, so use `install/update.sh` or `install/update.ps1` instead. A session that is already running keeps the old instructions, so start a new one after updating.
 
 **Installed manually.** Get the latest version, then replace the whole skill folder. Delete the old folder first, so files removed in the new version don't stay behind.
 
@@ -435,7 +435,7 @@ macOS / Linux:
 
 ```bash
 git -C mydevfactory fetch --tags
-git -C mydevfactory checkout v3.5.0
+git -C mydevfactory checkout v3.5.1
 rm -rf YourProject/.agents/skills/mydevfactory
 cp -R mydevfactory/skills/mydevfactory YourProject/.agents/skills/
 ```
@@ -444,7 +444,7 @@ PowerShell:
 
 ```powershell
 git -C .\mydevfactory fetch --tags
-git -C .\mydevfactory checkout v3.5.0
+git -C .\mydevfactory checkout v3.5.1
 Remove-Item -Recurse -Force C:\src\YourProject\.claude\skills\mydevfactory
 Copy-Item -Recurse .\mydevfactory\skills\mydevfactory C:\src\YourProject\.claude\skills\
 ```
