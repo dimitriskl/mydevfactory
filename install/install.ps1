@@ -372,7 +372,6 @@ try {
     }
     $workflow = Join-Path $Tmp "workflow.json"
     $hubRaw = "$RawRoot/$Owner/$HubName/$HubRef"
-    Save-Download "$hubRaw/.engineering-workflow.json" $workflow ".engineering-workflow.json"
 
     $skillUrl = "https://github.com/$Owner/$HubName/tree/$HubRef"
     Write-Output "Skill: mydevfactory @ $HubRef"
@@ -388,6 +387,17 @@ try {
     if ($LASTEXITCODE -ne 0) { Fail "Could not clone the hub for the pinned skill.`nNo agent files were written. Rerunning is safe." }
     & git -C $skillSource checkout --quiet --detach $HubRef
     if ($LASTEXITCODE -ne 0) { Fail "Could not check out hub commit $HubRef.`nNo agent files were written. Rerunning is safe." }
+    # Older pinned commits use the legacy name; the checked-out commit determines availability.
+    $configName = ".mydevfactory.json"
+    $configSource = Join-Path $skillSource $configName
+    if (-not (Test-Path -LiteralPath $configSource -PathType Leaf)) {
+        $configName = ".engineering-workflow.json"
+        $configSource = Join-Path $skillSource $configName
+    }
+    if (-not (Test-Path -LiteralPath $configSource -PathType Leaf) -or (Get-Item -LiteralPath $configSource).Length -eq 0) {
+        Fail "Pinned hub config is missing or empty.`nNo agent files were written. Rerunning is safe."
+    }
+    Copy-Item -LiteralPath $configSource -Destination $workflow
     $skillArgs = @("-y", "skills", "add", $skillSource, "--skill", "mydevfactory", "-a", "claude-code", "codex")
     if ($Scope -eq "personal") { $skillArgs += "-g" }
     $skillArgs += "-y"
@@ -466,12 +476,16 @@ fs.writeFileSync(path.join(receiptDir, "skill-pin.json"),
         Install-AgentFile (Join-Path $Tmp ($agent.Name + ".toml")) (Join-Path (Join-Path (Join-Path $Base ".codex") "agents") ($agent.Name + ".toml"))
     }
 
-    $workflowDest = Join-Path $Base ".engineering-workflow.json"
+    $workflowDest = Join-Path $Base ".mydevfactory.json"
     if ($Scope -eq "project") {
-        if (Test-Path -LiteralPath $workflowDest) { Write-Output "Config: .engineering-workflow.json kept as is" }
+        if (Test-Path -LiteralPath $workflowDest) { Write-Output "Config: .mydevfactory.json kept as is" }
+        elseif (Test-Path -LiteralPath (Join-Path $Base ".engineering-workflow.json") -PathType Leaf) {
+            Copy-Item -LiteralPath (Join-Path $Base ".engineering-workflow.json") -Destination $workflowDest
+            Write-Output "Config: .engineering-workflow.json copied to .mydevfactory.json"
+        }
         else {
             Copy-Item -LiteralPath $workflow -Destination $workflowDest
-            Write-Output "Config: .engineering-workflow.json added"
+            Write-Output "Config: .mydevfactory.json added"
         }
     }
 
@@ -525,8 +539,8 @@ fs.writeFileSync(path.join(receiptDir, "skill-pin.json"),
     }
 
     if ($Scope -eq "personal") {
-        Write-Output "Config: in each project root, add .engineering-workflow.json:"
-        Write-Output "  irm $hubRaw/.engineering-workflow.json -OutFile .engineering-workflow.json"
+        Write-Output "Config: in each project root, add .mydevfactory.json:"
+        Write-Output "  irm $hubRaw/$configName -OutFile .mydevfactory.json"
     }
     Write-Output "Done. Start a new Claude Code or Codex session to use the updated skill and agents."
 } finally {

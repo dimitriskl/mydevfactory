@@ -78,7 +78,7 @@ assert_no_grep() {
 clean_tree() {
   local dir="$1" name="$2"
   local hit
-  hit="$(find "$dir" -mindepth 1 \( -name .claude -o -name .codex -o -name .agents -o -name .engineering-judgment -o -name .engineering-workflow.json -o -name skills-lock.json -o -name .skill-lock.json \) -print 2>/dev/null || true)"
+  hit="$(find "$dir" -mindepth 1 \( -name .claude -o -name .codex -o -name .agents -o -name .engineering-judgment -o -name .mydevfactory.json -o -name skills-lock.json -o -name .skill-lock.json \) -print 2>/dev/null || true)"
   if [ -n "$hit" ]; then
     bad "$name (unexpected install files)"
     printf '%s\n' "$hit"
@@ -412,8 +412,8 @@ assert_grep "$OUT" "Scope: personal (" "personal install announces personal scop
 assert_grep "$OUT" "Hub: mydevfactory @ $HUB" "personal install prints the hub pin"
 assert_grep "$OUT" "Agent: requirements-analyst @ $REQ" "personal install prints the agent pin"
 assert_grep "$OUT" "updated    $PERSONAL_HOME/.claude/agents/requirements-analyst.md" "pre-existing agent file is backed up"
-assert_grep "$OUT" "\.engineering-workflow.json" "personal install prints the workflow command"
-if [ -f "$PERSONAL_WORK/.engineering-workflow.json" ] || [ -d "$PERSONAL_WORK/.claude/agents" ]; then
+assert_grep "$OUT" "\.mydevfactory.json" "personal install prints the workflow command"
+if [ -f "$PERSONAL_WORK/.mydevfactory.json" ] || [ -d "$PERSONAL_WORK/.claude/agents" ]; then
   bad "personal install wrote project files into the working folder"
   find "$PERSONAL_WORK" -mindepth 1 -print
 else
@@ -569,7 +569,7 @@ mkdir -p "$PROJ_A" "$PROJ_B"
 launch "$PROJ_HOME" "$PROJ_A" "$OUT" "$ERR" bash "$INSTALL" --scope project
 assert_status "fresh project install exits 0" 0 "$OUT" "$ERR"
 assert_grep "$OUT" "Scope: project (" "project install announces project scope"
-assert_grep "$OUT" "Config: .engineering-workflow.json added" "project install adds the workflow file"
+assert_grep "$OUT" "Config: .mydevfactory.json added" "project install adds the workflow file"
 if [ -d "$PROJ_HOME/.claude/agents" ] || [ -d "$PROJ_HOME/.agents" ]; then
   bad "project install wrote agents into the user directory"
 else
@@ -586,8 +586,13 @@ else
   ok "project install does not remember project scope for every folder"
 fi
 remote_workflow="$CASE/workflow.json"
-curl -fsSL "https://raw.githubusercontent.com/dimitriskl/mydevfactory/${HUB}/.engineering-workflow.json" -o "$remote_workflow"
-if cmp -s "$remote_workflow" "$PROJ_A/.engineering-workflow.json"; then
+status="$(curl -sSL -w '%{http_code}' "https://raw.githubusercontent.com/dimitriskl/mydevfactory/${HUB}/.mydevfactory.json" -o "$remote_workflow")"
+if [ "$status" = 404 ]; then
+  curl -fsSL "https://raw.githubusercontent.com/dimitriskl/mydevfactory/${HUB}/.engineering-workflow.json" -o "$remote_workflow"
+elif [ "$status" != 200 ]; then
+  bad "could not download pinned configuration (HTTP $status)"
+fi
+if cmp -s "$remote_workflow" "$PROJ_A/.mydevfactory.json"; then
   ok "project workflow file matches the hub pin"
 else
   bad "project workflow file does not match the hub pin"
@@ -604,15 +609,36 @@ if python3 -c 'import json,sys; assert json.load(open(sys.argv[1]))["commit"] ==
 else
   bad "project receipt or lock source is wrong"
 fi
-printf '%s\n' '{"kept":true}' > "$PROJ_A/.engineering-workflow.json"
+printf '%s\n' '{"kept":true}' > "$PROJ_A/.mydevfactory.json"
 launch "$PROJ_HOME" "$PROJ_A" "$OUT" "$ERR" bash "$INSTALL"
 assert_status "project update without a flag exits 0" 0 "$OUT" "$ERR"
 assert_grep "$OUT" "Remembered for this folder only" "a later run in the project folder stays on project scope"
-assert_grep "$OUT" "Config: .engineering-workflow.json kept as is" "an existing workflow file is kept"
-if grep -q '"kept": true' "$PROJ_A/.engineering-workflow.json" || grep -q '"kept":true' "$PROJ_A/.engineering-workflow.json"; then
+assert_grep "$OUT" "Config: .mydevfactory.json kept as is" "an existing workflow file is kept"
+if grep -q '"kept": true' "$PROJ_A/.mydevfactory.json" || grep -q '"kept":true' "$PROJ_A/.mydevfactory.json"; then
   ok "the existing workflow file was not replaced"
 else
   bad "the existing workflow file was replaced"
+fi
+
+LEGACY_PROJECT="$CASE/legacy-project"
+mkdir -p "$LEGACY_PROJECT"
+printf '{ }\r\n' > "$LEGACY_PROJECT/.engineering-workflow.json"
+launch "$PROJ_HOME" "$LEGACY_PROJECT" "$OUT" "$ERR" bash "$INSTALL" --scope project
+assert_status "legacy project install exits 0" 0 "$OUT" "$ERR"
+assert_grep "$OUT" "copied to .mydevfactory.json" "legacy configuration is migrated"
+if cmp -s "$LEGACY_PROJECT/.engineering-workflow.json" "$LEGACY_PROJECT/.mydevfactory.json"; then
+  ok "migration preserves exact bytes and legacy file"
+else
+  bad "migration changed configuration bytes"
+fi
+printf new-wins > "$LEGACY_PROJECT/.mydevfactory.json"
+printf legacy-remains > "$LEGACY_PROJECT/.engineering-workflow.json"
+launch "$PROJ_HOME" "$LEGACY_PROJECT" "$OUT" "$ERR" bash "$INSTALL" --scope project
+assert_status "both configs install exits 0" 0 "$OUT" "$ERR"
+if [ "$(cat "$LEGACY_PROJECT/.mydevfactory.json")" = new-wins ] && [ "$(cat "$LEGACY_PROJECT/.engineering-workflow.json")" = legacy-remains ]; then
+  ok "new config wins and both files remain unchanged"
+else
+  bad "both config precedence failed"
 fi
 
 launch "$PROJ_HOME" "$PROJ_B" "$OUT" "$ERR" env EJ_RAW_ROOT="http://127.0.0.1:9" bash "$INSTALL"
