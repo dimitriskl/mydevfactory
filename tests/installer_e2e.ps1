@@ -33,7 +33,7 @@ function Assert-Lacks([string]$Path, [string]$Needle, [string]$Name) {
 }
 function Assert-Clean([string]$Dir, [string]$Name) {
     if (-not (Test-Path -LiteralPath $Dir)) { Ok $Name; return }
-    $names = @(".claude", ".codex", ".agents", ".engineering-judgment", ".engineering-workflow.json", "skills-lock.json", ".skill-lock.json")
+    $names = @(".claude", ".codex", ".agents", ".engineering-judgment", ".mydevfactory.json", "skills-lock.json", ".skill-lock.json")
     $hits = @(Get-ChildItem -LiteralPath $Dir -Force -Recurse -ErrorAction SilentlyContinue | Where-Object { $names -contains $_.Name })
     if ($hits.Count -gt 0) {
         Bad $Name
@@ -466,7 +466,7 @@ Assert-Has $c.Out "Scope: personal (" "personal install announces personal scope
 Assert-Has $c.Out "Hub: mydevfactory @ $Hub" "personal install prints the hub pin"
 Assert-Has $c.Out "Agent: requirements-analyst @ $Req" "personal install prints the agent pin"
 Assert-Has $c.Out "updated    $(Join-Path $claudeAgents 'requirements-analyst.md')" "pre-existing agent file is backed up"
-Assert-Has $c.Out ".engineering-workflow.json" "personal install prints the workflow command"
+Assert-Has $c.Out ".mydevfactory.json" "personal install prints the workflow command"
 Assert-Clean $c.Work "personal install leaves the working folder free of project agents"
 $scopeText = (Read-Text (Join-Path $c.Home ".engineering-judgment/install-scope")).Trim()
 if ($scopeText -eq "personal") { Ok "personal scope is remembered under the user directory" } else { Bad "personal scope file was not saved" }
@@ -555,14 +555,19 @@ New-Item -ItemType Directory -Force -Path $projA, $projB | Out-Null
 $code = Invoke-Install $c $Install @("--scope", "Project") $null $null "file" $projA
 Assert-Status $code 0 "fresh project install exits 0" $c
 Assert-Has $c.Out "Scope: project (" "project install announces project scope"
-Assert-Has $c.Out "Config: .engineering-workflow.json added" "project install adds the workflow file"
+Assert-Has $c.Out "Config: .mydevfactory.json added" "project install adds the workflow file"
 if ((Test-Path (Join-Path $c.Home ".claude/agents")) -or (Test-Path (Join-Path $c.Home ".agents"))) { Bad "project install wrote agents into the user directory" } else { Ok "project install does not write agents into the user directory" }
 $marker = (Read-Text (Join-Path $projA ".engineering-judgment/install-scope")).Trim()
 if ($marker -ceq "project") { Ok "mixed-case scope is stored as project" } else { Bad "project scope marker is missing or not normalized" }
 if (Test-Path (Join-Path $c.Home ".engineering-judgment/install-scope")) { Bad "project install wrote a user-wide scope file" } else { Ok "project install does not remember project scope for every folder" }
 $remoteWorkflow = Join-Path $c.Case "workflow.json"
-Invoke-WebRequest -UseBasicParsing -Uri "https://raw.githubusercontent.com/dimitriskl/mydevfactory/$Hub/.engineering-workflow.json" -OutFile $remoteWorkflow | Out-Null
-$workflowPath = Join-Path $projA ".engineering-workflow.json"
+try {
+    Invoke-WebRequest -UseBasicParsing -Uri "https://raw.githubusercontent.com/dimitriskl/mydevfactory/$Hub/.mydevfactory.json" -OutFile $remoteWorkflow | Out-Null
+} catch {
+    if ([int]$_.Exception.Response.StatusCode -ne 404) { throw }
+    Invoke-WebRequest -UseBasicParsing -Uri "https://raw.githubusercontent.com/dimitriskl/mydevfactory/$Hub/.engineering-workflow.json" -OutFile $remoteWorkflow | Out-Null
+}
+$workflowPath = Join-Path $projA ".mydevfactory.json"
 if ((Get-FileHash $remoteWorkflow).Hash -eq (Get-FileHash $workflowPath).Hash) { Ok "project workflow file matches the hub pin" } else { Bad "project workflow file does not match the hub pin" }
 $projSkill = Get-ChildItem -LiteralPath $projA -Force -Recurse -Filter SKILL.md -File | Where-Object { $_.Directory.Name -eq "mydevfactory" } | Select-Object -First 1
 if ($projSkill -and (Get-FileHash $remoteSkill).Hash -eq (Get-FileHash $projSkill.FullName).Hash) { Ok "project skill matches the pinned hub commit" } else { Bad "project skill does not match the pinned hub commit" }
@@ -574,8 +579,23 @@ if (-not $projectLock.skills.PSObject.Properties["mydevfactory"]) { Ok "project 
 $code = Invoke-Install $c $Install @() $null $null "file" $projA
 Assert-Status $code 0 "project update without a flag exits 0" $c
 Assert-Has $c.Out "Remembered for this folder only" "a later run in the project folder stays on project scope"
-Assert-Has $c.Out "Config: .engineering-workflow.json kept as is" "an existing workflow file is kept"
+Assert-Has $c.Out "Config: .mydevfactory.json kept as is" "an existing workflow file is kept"
 if ((Read-Text $workflowPath).Contains('"kept":true')) { Ok "the existing workflow file was not replaced" } else { Bad "the existing workflow file was replaced" }
+
+$legacyProject = Join-Path $c.Case "legacy-project"
+New-Item -ItemType Directory -Force -Path $legacyProject | Out-Null
+$legacyPath = Join-Path $legacyProject ".engineering-workflow.json"
+$newPath = Join-Path $legacyProject ".mydevfactory.json"
+[IO.File]::WriteAllBytes($legacyPath, [byte[]](123, 32, 125, 13, 10))
+$code = Invoke-Install $c $Install @("--scope", "project") $null $null "file" $legacyProject
+Assert-Status $code 0 "legacy project install exits 0" $c
+Assert-Has $c.Out "copied to .mydevfactory.json" "legacy configuration is migrated"
+if ((Get-FileHash $legacyPath).Hash -eq (Get-FileHash $newPath).Hash) { Ok "migration preserves exact bytes and legacy file" } else { Bad "migration changed configuration bytes" }
+[IO.File]::WriteAllText($newPath, 'new-wins', $utf8)
+[IO.File]::WriteAllText($legacyPath, 'legacy-remains', $utf8)
+$code = Invoke-Install $c $Install @("--scope", "project") $null $null "file" $legacyProject
+Assert-Status $code 0 "both configs install exits 0" $c
+if ((Read-Text $newPath) -eq 'new-wins' -and (Read-Text $legacyPath) -eq 'legacy-remains') { Ok "new config wins and both files remain unchanged" } else { Bad "both config precedence failed" }
 
 $code = Invoke-Install $c $Install @() @{ EJ_RAW_ROOT = "http://127.0.0.1:9" } $null "file" $projB
 Assert-Status $code 1 "another folder does not continue a project install" $c

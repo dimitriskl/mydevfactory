@@ -27,7 +27,7 @@ The scope may increase the risk. The developer, not the model alone, owns conseq
 
 1. Is the problem already defined in existing project docs? Reuse them.
 2. Which behavior must remain invariant, and what would falsify the proposed fix?
-3. Are the mapped agents (analyst, backend, frontend, reviewer, qa) really callable or merely named in `.engineering-workflow.json`?
+3. Are the mapped agents (analyst, backend, frontend, reviewer, qa) really callable or merely named in `.mydevfactory.json`?
 4. What codepaths and interface contracts could the change affect?
 5. What did actual checks prove, and what did they miss?
 6. What would you need to defend this change to its maintainer?

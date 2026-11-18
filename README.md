@@ -52,7 +52,7 @@ Every install is reproducible: the skill and each agent are fetched at the commi
 - **Personal scope is remembered for your user** (`~/.engineering-judgment/install-scope`). **Project scope is remembered only in that folder** (`<project>/.engineering-judgment/install-scope`). A project install does not affect later runs in other folders. The `.engineering-judgment` folder keeps the project's earlier name on purpose, so existing installs keep their settings.
 - **Later runs** reuse the remembered scope and update what is already installed. A changed agent file is replaced and the previous copy is kept as `<file>.bak-YYYYMMDD-HHMMSS` (UTC). Older backups stay. To choose again: `--scope personal` or `--scope project` (bash: `bash install/install.sh --scope project`; PowerShell: `--scope project` or `$env:EJ_SCOPE`).
 - Every remote file is downloaded before anything is written. If a download fails, the installer names the file and URL, writes nothing, and says that rerunning is safe.
-- In project scope it adds `.engineering-workflow.json` when the folder has none. Commit that file to share the agent map. `.agents/`, `.claude/`, `.codex/`, `.engineering-judgment/`, and the skills lock are local tool state.
+- In project scope it adds `.mydevfactory.json` when the folder has none. If only the legacy `.engineering-workflow.json` exists, the installer copies it byte for byte to the new name and retains the old file. If both exist, the new file wins and is kept unchanged. Commit the new file to share the agent map. `.agents/`, `.claude/`, `.codex/`, `.engineering-judgment/`, and the skills lock are local tool state.
 - It also sets **auto-compact at 40%** ([below](#auto-compact-at-40)) if you haven't set it yourself.
 
 ### Auto-compact at 40%
@@ -311,7 +311,7 @@ Also available: [ui-ux-developer](https://github.com/dimitriskl/ui-ux-developer)
 
 Each repository's README shows how to install the agent for one project (`.claude/agents/`, `.codex/agents/`) or for all your projects (`~/.claude/agents/`, `~/.codex/agents/`).
 
-**Connect them to the skill** with `.engineering-workflow.json` in the **root of your project repository** (the repo you work in, not this skill's folder). The [default file](.engineering-workflow.json) already maps the agents above — copy it as it is:
+**Connect them to the skill** with `.mydevfactory.json` in the **root of your project repository** (the repo you work in, not this skill's folder). The [default file](.mydevfactory.json) already maps the agents above — copy it as it is:
 
 ```json
 {
@@ -355,7 +355,7 @@ Each repository's README shows how to install the agent for one project (`.claud
 | `qa` | sonnet · low | gpt-6.1-terra · low | Runs the listed checks against written acceptance criteria |
 
 - **Change one run** without editing the file: start your prompt with a line such as `reviewer: opus high`.
-- **Change saved choices:** ask the orchestrator to change the models, or edit the role's `model.claude` or `model.codex` value in `.engineering-workflow.json`. Existing choices stay in place until you request a change.
+- **Change saved choices:** ask the orchestrator to change the models, or edit the role's `model.claude` or `model.codex` value in `.mydevfactory.json`. Existing choices stay in place until you request a change.
 - **Leave a value out** (or empty) and that agent uses your session's model or effort. If the Codex or Claude `model` is empty, the orchestrator asks you which models to use, writes them into the file and shows you the change.
 - **Claude Code choices:** choose an available agent-tool alias: `fable`, `opus`, `sonnet`, or `haiku`. Anthropic currently lists Fable 5.2 and Opus, Sonnet, and Haiku 5.5 in its [model overview](https://platform.claude.com/docs/en/models/overview). The Agent tool takes aliases, not full model IDs, for individual subagent calls; an alias does not guarantee an exact version. Availability and resolution depend on your account and provider; see [Claude Code subagent model selection](https://code.claude.com/docs/en/sub-agents#choose-a-model).
 - **Model names change.** If a name is rejected, the agent runs on your session's model and the status line says so. Check `/model` in your tool for the current names.
@@ -402,7 +402,7 @@ Use the corresponding destination for your agent. Restart its session, then invo
 
 ## Updating the skill
 
-Check [CHANGELOG.md](CHANGELOG.md) first. A new major version (for example 2.x → 3.0.0) can change how the skill works or what `.engineering-workflow.json` contains.
+Check [CHANGELOG.md](CHANGELOG.md) first. A new major version (for example 2.x → 3.0.0) can change how the skill works or what `.mydevfactory.json` contains.
 
 **If you installed with the MyDevFactory installer**, update the skill **and all eight pinned agents** using the matching updater (Node.js 22.20 or later), from tag `v3.5.1`:
 
@@ -454,7 +454,7 @@ Use the same skills folder you installed to (`.agents/skills/`, `.claude/skills/
 **After updating:**
 
 - Start a new agent session, so the new version is loaded.
-- Compare your project's `.engineering-workflow.json` with the [current default](.engineering-workflow.json) and remove keys the skill no longer reads.
+- Compare your project's `.mydevfactory.json` with the [current default](.mydevfactory.json) and remove keys the skill no longer reads.
 - Your `prd/` folders are not touched by an update. A new session resumes the board from them.
 - If you update only the skill with `npx skills` or manually, update the agents separately or use the combined updater above.
 

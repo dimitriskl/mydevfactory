@@ -529,7 +529,6 @@ while IFS=$'\t' read -r name sha; do
   download "${RAW_ROOT}/${OWNER}/${name}/${sha}/.codex/agents/${name}.toml" \
     "$workdir/${name}.toml" "${name} .codex/agents/${name}.toml"
 done < "$workdir/agent-pins.tsv"
-download "${hub_raw}/.engineering-workflow.json" "$workdir/workflow.json" ".engineering-workflow.json"
 
 skill_url="https://github.com/${OWNER}/${HUB_NAME}/tree/${HUB_REF}"
 echo "Skill: mydevfactory @ ${HUB_REF}"
@@ -549,6 +548,16 @@ if ! git -C "$skill_source" checkout --quiet --detach "$HUB_REF"; then
   die 1 "Could not check out hub commit ${HUB_REF}.
 No agent files were written. Rerunning is safe."
 fi
+# Older pinned commits use the legacy name; the checked-out commit determines availability.
+config_name=".mydevfactory.json"
+if [ ! -f "$skill_source/$config_name" ]; then
+  config_name=".engineering-workflow.json"
+fi
+if [ ! -s "$skill_source/$config_name" ]; then
+  die 1 "Pinned hub config is missing or empty.
+No agent files were written. Rerunning is safe."
+fi
+cp "$skill_source/$config_name" "$workdir/workflow.json"
 # A Windows Node process cannot resolve Git Bash's /tmp path.
 if command -v cygpath >/dev/null 2>&1; then skill_source="$(cygpath -w "$skill_source")"; fi
 rm -f "$BASE/.engineering-judgment/skill-pin.json"
@@ -633,11 +642,14 @@ while IFS=$'\t' read -r name sha; do
 done < "$workdir/agent-pins.tsv"
 
 if [ "$SCOPE" = "project" ]; then
-  if [ -f "$BASE/.engineering-workflow.json" ]; then
-    echo "Config: .engineering-workflow.json kept as is"
+  if [ -f "$BASE/.mydevfactory.json" ]; then
+    echo "Config: .mydevfactory.json kept as is"
+  elif [ -f "$BASE/.engineering-workflow.json" ]; then
+    cp "$BASE/.engineering-workflow.json" "$BASE/.mydevfactory.json"
+    echo "Config: .engineering-workflow.json copied to .mydevfactory.json"
   else
-    cp "$workdir/workflow.json" "$BASE/.engineering-workflow.json"
-    echo "Config: .engineering-workflow.json added"
+    cp "$workdir/workflow.json" "$BASE/.mydevfactory.json"
+    echo "Config: .mydevfactory.json added"
   fi
 fi
 
@@ -691,8 +703,8 @@ else
 fi
 
 if [ "$SCOPE" = "personal" ]; then
-  echo "Config: in each project root, add .engineering-workflow.json:"
-  echo "  curl -fsSL ${hub_raw}/.engineering-workflow.json -o .engineering-workflow.json"
+  echo "Config: in each project root, add .mydevfactory.json:"
+  echo "  curl -fsSL ${hub_raw}/${config_name} -o .mydevfactory.json"
 fi
 
 echo "Done. Start a new Claude Code or Codex session to use the updated skill and agents."

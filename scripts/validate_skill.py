@@ -28,7 +28,7 @@ else:
             errors.append(f"Broken skill reference: {ref}")
     if len(body.splitlines()) > 500:
         errors.append("SKILL.md too long; move detail into references")
-for p in ("README.md", "LICENSE", "CONTRIBUTING.md", ".engineering-workflow.json"):
+for p in ("README.md", "LICENSE", "CONTRIBUTING.md", ".mydevfactory.json"):
     if not (root / p).is_file():
         errors.append(f"Missing {p}")
 
@@ -95,7 +95,7 @@ REQUIRED["skills/mydevfactory/references/training-drills.md"] += ["Question n/N"
 REQUIRED["skills/mydevfactory/SKILL.md"] += ["Question n/N"]
 REQUIRED["README.md"] += ["## Updating the skill", "npx skills check", "npx skills update mydevfactory"]
 # The default analyst is requirements-analyst, linked for download.
-REQUIRED[".engineering-workflow.json"] = ['"name": "requirements-analyst"']
+REQUIRED[".mydevfactory.json"] = ['"name": "requirements-analyst"']
 REQUIRED["README.md"] += ["https://github.com/dimitriskl/requirements-analyst", '"name": "requirements-analyst"']
 # Chat text names its speaker, with one color marker per role.
 ROLE_COLORS = ["🟣 analyst", "🔵 backend", "🟢 frontend", "🟠 reviewer", "🟡 qa", "⚪ orchestrator"]
@@ -162,15 +162,15 @@ REQUIRED["examples/prd/invoice-approval/prd-tasks/001-approve-invoice.md"] = REQ
 REQUIRED["examples/prd/invoice-approval/invoice-approval.md"] = REQUIRED["examples/prd/invoice-approval/invoice-approval.md"] + ["Not signed yet"]
 import json
 try:
-    cfg = json.loads((root / ".engineering-workflow.json").read_text(encoding="utf-8"))
+    cfg = json.loads((root / ".mydevfactory.json").read_text(encoding="utf-8"))
     for role in ("analyst", "backend", "frontend", "qa", "reviewer"):
         a = cfg["agents"][role]
         for key in ("model", "effort"):
             for host in ("claude", "codex"):
                 if not isinstance(a.get(key, {}).get(host), str) or not a[key][host]:
-                    errors.append(f".engineering-workflow.json: agents.{role}.{key}.{host} missing")
+                    errors.append(f".mydevfactory.json: agents.{role}.{key}.{host} missing")
 except (ValueError, KeyError) as exc:
-    errors.append(f".engineering-workflow.json invalid: {exc}")
+    errors.append(f".mydevfactory.json invalid: {exc}")
 for rel, phrases in REQUIRED.items():
     path = root / rel
     if not path.is_file():
@@ -197,7 +197,7 @@ for f in sorted(skill_dir.rglob("*.md")):
 
 # The skill is self-contained: external planning skills must not be referenced.
 BANNED = ["grill-with-docs", "grillme-with-docs", "to-prd", "to-tasks", "to-issues", "to-tickets"]
-BANNED_SCOPE = ["skills", "README.md", ".engineering-workflow.json", "examples"]
+BANNED_SCOPE = ["skills", "README.md", ".mydevfactory.json", "examples"]
 banned_re = re.compile(r"(?<![\w-])(" + "|".join(map(re.escape, BANNED)) + r")(?![\w-])")
 for scope in BANNED_SCOPE:
     target = root / scope

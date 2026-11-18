@@ -37,7 +37,11 @@ We welcome issue reports and PRs. Merging remains at the maintainers' discretion
 
 Pins live in [`install/pins.txt`](install/pins.txt): one full 40-character commit SHA per line, not a branch or tag. Keep the names in [`install/agents.txt`](install/agents.txt) in sync. `EJ_PINS` selects another pins file and `EJ_RAW_ROOT` changes the raw download host, which is useful for testing.
 
+The canonical project configuration is `.mydevfactory.json`. Legacy `.engineering-workflow.json` files are copied byte for byte when the new file is absent; both are retained, and the new file takes precedence. The installer selects either name from historical pinned commits.
+
 The installer checks out the resolved hub commit before passing its local tree to the skills CLI. It records the commit in the scope's `.engineering-judgment/skill-pin.json` and removes the CLI's matching temporary-source project lock entry. Update with the installer, including for installations made with older CLI lock entries; generic `skills update` cannot follow the temporary checkout.
+
+The config rename requires a release pin to a commit containing the updated skill: historical pins contain a skill that still reads the legacy filename. Complete the post-merge pin bump before releasing this rename. The installer can retrieve defaults from older pins, but that does not update the old skill.
 
 To release the hub, merge the change, then set the hub line in `install/pins.txt` to that merge commit, commit the pin bump, and tag **the pin-bump commit** (for example `v3.5.0`). A commit can't pin itself, so tagging the merge would still install the previous skill. Install from tag `v3.5.0` after that tag is created. The README commands use that tag and assume it already exists; do not point users at `main`. When an agent release merges, replace that agent's SHA with its release commit.
 
