@@ -17,7 +17,9 @@ Upgrading from `engineering-judgment` or 3.4? See the [migration note](#manual-i
 
 > These commands install the tagged `v3.5.0` build. Its project configuration is `.engineering-workflow.json`. See the [v3.5.0 README](https://github.com/dimitriskl/mydevfactory/blob/v3.5.0/README.md) for configuration and usage specific to that build.
 
-**One command installs the skill and all the [agents](#agents-use-mine-or-map-your-own)** for Claude Code and Codex. Run it from your project folder. Node.js 22.20 or later is required; the installer checks this first and stops with a link to [nodejs.org](https://nodejs.org) if Node is missing or older.
+The installer sets up MyDevFactory and its pinned agents for Claude Code and Codex. **Project scope works in any local folder, including an empty one. A GitHub repository and account are optional.** Personal scope makes the skill available across projects.
+
+Install [Git](https://git-scm.com/downloads) and [Node.js](https://nodejs.org) 22.20 or later first. Check them with `git --version` and `node -v`. For project scope, open a terminal in the folder where you want MyDevFactory and select **project** when prompted.
 
 ```bash
 # Linux and macOS
@@ -54,7 +56,7 @@ Every install is reproducible: the skill and each agent are fetched at the commi
 - **Personal scope is remembered for your user** (`~/.engineering-judgment/install-scope`). **Project scope is remembered only in that folder** (`<project>/.engineering-judgment/install-scope`). A project install does not affect later runs in other folders. The `.engineering-judgment` folder keeps the project's earlier name on purpose, so existing installs keep their settings.
 - **Later runs** reuse the remembered scope and update what is already installed. A changed agent file is replaced and the previous copy is kept as `<file>.bak-YYYYMMDD-HHMMSS` (UTC). Older backups stay. To choose again: `--scope personal` or `--scope project` (bash: `bash install/install.sh --scope project`; PowerShell: `--scope project` or `$env:EJ_SCOPE`).
 - Every remote file is downloaded before anything is written. If a download fails, the installer names the file and URL, writes nothing, and says that rerunning is safe.
-- In project scope it adds `.mydevfactory.json` when the folder has none. If only the legacy `.engineering-workflow.json` exists, the installer copies it byte for byte to the new name and retains the old file. If both exist, the new file wins and is kept unchanged. Commit the new file to share the agent map. `.agents/`, `.claude/`, `.codex/`, `.engineering-judgment/`, and the skills lock are local tool state.
+- In v4, project scope adds `.mydevfactory.json` when the folder has none. If only the legacy `.engineering-workflow.json` exists, the installer copies it byte for byte to the new name and retains the old file. If both exist, the new file wins and is kept unchanged. Commit the new file to share the agent map. `.agents/`, `.claude/`, `.codex/`, `.engineering-judgment/`, and the skills lock are local tool state.
 - It also sets **auto-compact at 40%** ([below](#auto-compact-at-40)) if you haven't set it yourself.
 
 ### Auto-compact at 40%
