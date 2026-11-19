@@ -15,23 +15,25 @@ Upgrading from `engineering-judgment` or 3.4? See the [migration note](#manual-i
 
 ## 30-second start
 
+> These commands install the tagged `v3.5.0` build. Its project configuration is `.engineering-workflow.json`. See the [v3.5.0 README](https://github.com/dimitriskl/mydevfactory/blob/v3.5.0/README.md) for configuration and usage specific to that build.
+
 **One command installs the skill and all the [agents](#agents-use-mine-or-map-your-own)** for Claude Code and Codex. Run it from your project folder. Node.js 22.20 or later is required; the installer checks this first and stops with a link to [nodejs.org](https://nodejs.org) if Node is missing or older.
 
 ```bash
 # Linux and macOS
-curl -fsSL https://raw.githubusercontent.com/dimitriskl/mydevfactory/v3.5.1/install/install.sh | bash -s -- --ref v3.5.1
+curl -fsSL https://raw.githubusercontent.com/dimitriskl/mydevfactory/v3.5.0/install/install.sh | bash -s -- --ref v3.5.0
 ```
 
 ```powershell
 # Windows (PowerShell)
-$env:EJ_REF = 'v3.5.1'
-irm https://raw.githubusercontent.com/dimitriskl/mydevfactory/v3.5.1/install/install.ps1 | iex
+$env:EJ_REF = 'v3.5.0'
+irm https://raw.githubusercontent.com/dimitriskl/mydevfactory/v3.5.0/install/install.ps1 | iex
 ```
 
 Only want the skill?
 
 ```bash
-npx skills add https://github.com/dimitriskl/mydevfactory/tree/v3.5.1 --skill mydevfactory
+npx skills add https://github.com/dimitriskl/mydevfactory/tree/v3.5.0 --skill mydevfactory
 ```
 
 Then open a **new agent session** and invoke the skill: `/mydevfactory` in Claude Code, `$mydevfactory` in Codex. To try it on a first feature, see [First feature: add 2FA to login](#first-feature-add-2fa-to-login).
@@ -41,7 +43,7 @@ Then open a **new agent session** and invoke the skill: `/mydevfactory` in Claud
 Prefer to read the script first? Clone the tag anywhere, then run it **from your project folder**:
 
 ```bash
-git clone --branch v3.5.1 https://github.com/dimitriskl/mydevfactory.git ~/src/mydevfactory
+git clone --branch v3.5.0 https://github.com/dimitriskl/mydevfactory.git ~/src/mydevfactory
 cd /path/to/your/project
 bash ~/src/mydevfactory/install/install.sh      # or: pwsh -File ~/src/mydevfactory/install/install.ps1
 ```
@@ -374,7 +376,7 @@ Each repository's README shows how to install the agent for one project (`.claud
 - **Settings that win over the file:** in Claude Code, the `CLAUDE_CODE_EFFORT_LEVEL` and `CLAUDE_CODE_SUBAGENT_MODEL_FORCE` environment variables; in Codex, a `model` line inside an agent's own `.toml` file (the agents above have none). The orchestrator warns you if one is set.
 - The orchestrator itself is your main session, so its model is the one you choose when you start (`/model`). It only reads the board, so a mid-level model is usually enough.
 
-**Upgrading an existing project?** The installer preserves your JSON. Add the `securitycode` block shown above to enable the new gate. A fresh v4 installation includes the mapping. The installation commands above target the published v3.5.1 until v4 is released.
+**Upgrading an existing project?** The installer preserves your JSON. Add the `securitycode` block shown above to enable the new gate. A fresh v4 installation includes the mapping. The v3.5.0 quick start installs the earlier workflow. The Securitycode role requires v4.
 
 **Using other agents?** Replace each `name` with your own agent's name. MyDevFactory runs each configured role in order for changes, including small edits and deadlines. Omit a role, set it to an empty string, or leave its name blank to skip only that step. A named agent that cannot run blocks that step. The workflow takes its role assignments from a trusted starting configuration. A branch under review cannot disable its own checks. Backend and frontend each inspect the task and record why their work is inapplicable when appropriate. QA begins after the configured code and security reviews pass. The skill checks the evidence before accepting completion. See [required roles and evidence](skills/mydevfactory/references/workflow-evidence.md).
 
@@ -396,7 +398,7 @@ Example (macOS/Linux):
 
 ```bash
 git clone https://github.com/dimitriskl/mydevfactory.git
-git -C mydevfactory checkout v3.5.1
+git -C mydevfactory checkout v3.5.0
 mkdir -p YourProject/.agents/skills
 cp -R mydevfactory/skills/mydevfactory YourProject/.agents/skills/
 ```
@@ -405,7 +407,7 @@ Example (PowerShell):
 
 ```powershell
 git clone https://github.com/dimitriskl/mydevfactory.git
-git -C mydevfactory checkout v3.5.1
+git -C mydevfactory checkout v3.5.0
 New-Item -ItemType Directory -Force C:\src\YourProject\.claude\skills | Out-Null
 Copy-Item -Recurse .\mydevfactory\skills\mydevfactory C:\src\YourProject\.claude\skills\
 ```
@@ -418,15 +420,15 @@ Use the corresponding destination for your agent. Restart its session, then invo
 
 Check [CHANGELOG.md](CHANGELOG.md) first. A new major version (for example 2.x → 3.0.0) can change how the skill works or what `.mydevfactory.json` contains.
 
-**If you installed with the MyDevFactory installer**, update the skill **and all pinned agents** using the matching updater (Node.js 22.20 or later), from tag `v3.5.1`:
+**If you installed with the MyDevFactory installer**, update the skill **and all pinned agents** using the matching updater (Node.js 22.20 or later), from tag `v3.5.0`:
 
 ```powershell
-$env:EJ_REF = 'v3.5.1'
-irm https://raw.githubusercontent.com/dimitriskl/mydevfactory/v3.5.1/install/update.ps1 | iex
+$env:EJ_REF = 'v3.5.0'
+irm https://raw.githubusercontent.com/dimitriskl/mydevfactory/v3.5.0/install/update.ps1 | iex
 ```
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/dimitriskl/mydevfactory/v3.5.1/install/update.sh | bash -s -- --ref v3.5.1
+curl -fsSL https://raw.githubusercontent.com/dimitriskl/mydevfactory/v3.5.0/install/update.sh | bash -s -- --ref v3.5.0
 ```
 
 From a checkout of that tag, run `bash install/update.sh` or `pwsh -File install/update.ps1` **from your project folder**, not from the skill checkout. The updater runs the installer again and reuses the saved personal scope, or the project scope remembered in the current folder. If you used project scope before 3.5.0, that choice was saved for every folder; run once with `--scope project` in the project you want (or `--scope personal`). To select a scope, set `$env:EJ_SCOPE = 'personal'` or `'project'` in PowerShell, or use `--scope project`. Changed agent files are backed up as `<file>.bak-YYYYMMDD-HHMMSS` (UTC) and older backups are kept. Existing workflow configuration and auto-compact values are kept. Missing skill or agent files are installed. The installer may add missing configuration and auto-compact settings as described in the 30-second start.
@@ -449,7 +451,7 @@ macOS / Linux:
 
 ```bash
 git -C mydevfactory fetch --tags
-git -C mydevfactory checkout v3.5.1
+git -C mydevfactory checkout v3.5.0
 rm -rf YourProject/.agents/skills/mydevfactory
 cp -R mydevfactory/skills/mydevfactory YourProject/.agents/skills/
 ```
@@ -458,7 +460,7 @@ PowerShell:
 
 ```powershell
 git -C .\mydevfactory fetch --tags
-git -C .\mydevfactory checkout v3.5.1
+git -C .\mydevfactory checkout v3.5.0
 Remove-Item -Recurse -Force C:\src\YourProject\.claude\skills\mydevfactory
 Copy-Item -Recurse .\mydevfactory\skills\mydevfactory C:\src\YourProject\.claude\skills\
 ```
