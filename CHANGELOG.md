@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.0.0 — Required role workflow
+
+- Add securitycode as a separate security reviewer with Claude Code and Codex model and effort settings.
+- Run every configured role on small, regular, and deadline changes. Missing and blank roles skip only their own steps.
+- Verify role evidence before marking work complete.
+
 ## 3.5.1 — Updater cleanup and validation hardening (2026-11-17)
 
 - Remove downloaded installer temporary directories after piped Bash and PowerShell updates, on both success and failure.

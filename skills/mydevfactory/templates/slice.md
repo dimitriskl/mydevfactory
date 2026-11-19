@@ -5,7 +5,7 @@
 
 Slice: <ID>
 PRD: [../<prd-name>.md](../<prd-name>.md)
-Risk: L1 | L2
+Risk: L0 | L1 | L2
 Status: To do
 Blocked by: None
 Blocked from: —
@@ -77,6 +77,10 @@ Round 1 · <agent>
 - Frontend: PASS | FAIL
 - Not proved by the green checks: …
 
+## Security review notes
+
+<!-- Record securitycode verdict, scope, evidence, findings, remediation and review limits. -->
+
 ## QA notes
 
 <!-- Written by the QA agent itself. One block per round. -->
@@ -102,6 +106,11 @@ UI flow evidence (when useful): <flow, environment, result, before/after artifac
 - Not proved (blind spots): …
 - Decision: ACCEPT | REJECT — reason: …
 - Signed: <git user.name> · <date> · commit <sha>
+
+## Workflow evidence
+
+| Role | Agent | Result | Revision | Evidence |
+| --- | --- | --- | --- | --- |
 
 ## History
 

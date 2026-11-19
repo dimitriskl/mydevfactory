@@ -21,9 +21,9 @@ Thanks for improving an open skill for engineering accountability.
 ## Pull request checklist
 
 - [ ] Existing agents, third-party skills and documents are preserved.
-- [ ] The main agent can work without any specialist agents installed.
+- [ ] Every configured role runs and records evidence. Missing or blank roles are recorded as skipped.
 - [ ] No test/review/external action is described as performed unless evidenced.
-- [ ] Urgent work has a shorter path than a large feature.
+- [ ] Urgent work uses shorter checks and keeps every configured step.
 - [ ] Changes do not weaken explicit human approval for irreversible actions.
 - [ ] Added files and instructions are documented in README.
 

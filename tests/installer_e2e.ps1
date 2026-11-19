@@ -471,9 +471,10 @@ Assert-Clean $c.Work "personal install leaves the working folder free of project
 $scopeText = (Read-Text (Join-Path $c.Home ".engineering-judgment/install-scope")).Trim()
 if ($scopeText -eq "personal") { Ok "personal scope is remembered under the user directory" } else { Bad "personal scope file was not saved" }
 $tomlDir = Join-Path $c.Home ".codex/agents"
+if ((Test-Path (Join-Path $claudeAgents "securitycode.md")) -and (Test-Path (Join-Path $tomlDir "securitycode.toml"))) { Ok "securitycode installed for both hosts" } else { Bad "securitycode missing from one or both hosts" }
 $mdCount = if (Test-Path -LiteralPath $claudeAgents) { @(Get-ChildItem -LiteralPath $claudeAgents -Filter *.md).Count } else { 0 }
 $tomlCount = if (Test-Path -LiteralPath $tomlDir) { @(Get-ChildItem -LiteralPath $tomlDir -Filter *.toml).Count } else { 0 }
-if ($mdCount -eq 8 -and $tomlCount -eq 8) { Ok "personal install places 8 agents in both hosts" } else { Bad "personal install placed $mdCount markdown and $tomlCount toml files" }
+if ($mdCount -eq 9 -and $tomlCount -eq 9) { Ok "personal install places 9 agents in both hosts" } else { Bad "personal install placed $mdCount markdown and $tomlCount toml files" }
 $remoteMd = Join-Path $c.Case "remote.md"
 $remoteToml = Join-Path $c.Case "remote.toml"
 $remoteSkill = Join-Path $c.Case "remote-skill.md"

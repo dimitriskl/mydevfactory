@@ -426,11 +426,13 @@ else
 fi
 md_count="$(find "$PERSONAL_HOME/.claude/agents" -maxdepth 1 -name '*.md' ! -name '*.bak-*' | wc -l | tr -d ' ')"
 toml_count="$(find "$PERSONAL_HOME/.codex/agents" -maxdepth 1 -name '*.toml' ! -name '*.bak-*' | wc -l | tr -d ' ')"
-if [ "$md_count" = "8" ] && [ "$toml_count" = "8" ]; then
-  ok "personal install places 8 agents in both hosts"
+if [ "$md_count" = "9" ] && [ "$toml_count" = "9" ]; then
+  ok "personal install places 9 agents in both hosts"
 else
   bad "personal install placed $md_count markdown and $toml_count toml files"
 fi
+test -s "$PERSONAL_HOME/.claude/agents/securitycode.md" && test -s "$PERSONAL_HOME/.codex/agents/securitycode.toml" \
+  && ok "securitycode installed for both hosts" || bad "securitycode missing from one or both hosts"
 remote_md="$CASE/remote.md"
 remote_toml="$CASE/remote.toml"
 remote_skill="$CASE/remote-skill.md"

@@ -13,3 +13,4 @@ agent senior-code-reviewer 252bb4c6b736f492ded16293f5b274ee47b08b43
 agent ui-ux-developer ce92c1d0b783dc63a104f0bc3ae203cf99cf1784
 agent software-architect c8ea135d3fad4474675925f5f66743d030a9d26c
 agent data-analyst-bi-expert bc80dd6a11546b0812f4e420ed81ba58002a7a4d
+agent securitycode 5abddca08f0c56ae85971e77f44492920d1cf182
