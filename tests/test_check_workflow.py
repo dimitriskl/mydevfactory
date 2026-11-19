@@ -69,9 +69,11 @@ class WorkflowEvidenceTests(unittest.TestCase):
         del self.rows["frontend"]
         self.config["agents"]["reviewer"] = None
         del self.rows["reviewer"]
+        self.config["agents"]["qa"] = ""
+        del self.rows["qa"]
         result = self.run_gate()
         self.assertEqual(result.returncode, 0, result)
-        self.assertIn("2 configured role(s)", result.stdout)
+        self.assertIn("1 configured role(s)", result.stdout)
 
     def test_configured_role_cannot_skip(self):
         self.rows["securitycode"] = self.rows["securitycode"].replace("PASS", "SKIPPED")
@@ -111,6 +113,7 @@ class WorkflowEvidenceTests(unittest.TestCase):
         for raw, message in (
             ('{"agents": []}', "agents object"),
             ('{"agents": {"securitycode": []}}', "agents.securitycode must be an object"),
+            ('{"agents": {"securitycode": "securitycode"}}', "agents.securitycode must be an object"),
             ('{"agents": {"securitycode": {"name": false}}}', "name must be a string"),
             ('{"agents": {"securitycode": null, "securitycode": null}}', "duplicate JSON key"),
         ):

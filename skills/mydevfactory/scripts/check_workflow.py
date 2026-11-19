@@ -31,7 +31,7 @@ def configured_roles(path):
     names = {}
     for role in ROLES:
         mapping = agents.get(role)
-        if mapping is None:
+        if mapping is None or (isinstance(mapping, str) and not mapping.strip()):
             continue
         if not isinstance(mapping, dict):
             raise ValueError(f"agents.{role} must be an object or null")
