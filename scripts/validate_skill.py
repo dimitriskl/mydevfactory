@@ -44,7 +44,7 @@ REQUIRED = {
         "Status:", "Blocked by:", "Failures:", "## What to build", "## Contract",
         "## Backend part", "## Frontend part", "Owned files:", "Test commands:",
         "Part status:", "## Acceptance criteria", "## Questions & answers",
-        "## Review notes", "## QA notes", "## Change requests", "## History",
+        "## Review notes", "## Security review notes", "## QA notes", "## Workflow evidence", "## Change requests", "## History",
         "## Developer sign-off",
     ],
     "skills/mydevfactory/references/kanban-protocol.md": [
@@ -66,7 +66,7 @@ REQUIRED = {
         "Change request by", "approved without viewing steps", "## Sign-off", "ACCEPT", "REJECT",
     ],
     "skills/mydevfactory/SKILL.md": [
-        'version: "3.5.1"', "human-on-the-loop", "`Walkthrough`", "references/kanban-protocol.md",
+        'version: "4.0.0"', "human-on-the-loop", "`Walkthrough`", "references/kanban-protocol.md",
         "references/analyst-playbook.md", "references/walkthrough.md", "templates/prd.md",
         "templates/slice.md", "fresh agent", "Developer sign-off", "only in Drill",
     ],
@@ -98,7 +98,7 @@ REQUIRED["README.md"] += ["## Updating the skill", "npx skills check", "npx skil
 REQUIRED[".mydevfactory.json"] = ['"name": "requirements-analyst"']
 REQUIRED["README.md"] += ["https://github.com/dimitriskl/requirements-analyst", '"name": "requirements-analyst"']
 # Chat text names its speaker, with one color marker per role.
-ROLE_COLORS = ["🟣 analyst", "🔵 backend", "🟢 frontend", "🟠 reviewer", "🟡 qa", "⚪ orchestrator"]
+ROLE_COLORS = ["🟣 analyst", "🔵 backend", "🟢 frontend", "🟠 reviewer", "🔴 securitycode", "🟡 qa", "⚪ orchestrator"]
 REQUIRED["skills/mydevfactory/SKILL.md"] += ROLE_COLORS + ["<role> [<model>, <effort>] (<agent name>):"]
 REQUIRED["skills/mydevfactory/references/kanban-protocol.md"] += ["<role> [<model>, <effort>] (<agent name>) · Question n/N"]
 REQUIRED["README.md"] += ROLE_COLORS + ["🟣 analyst [opus, high] (requirements-analyst):"]
@@ -146,7 +146,7 @@ for f in sorted((root / "skills").rglob("*.md")) + ([root / "README.md"] if (roo
             errors.append(f"{f.relative_to(root).as_posix()}:{n} orchestrator label without brackets")
 # One-command installer for the skill and every agent, on Windows, Linux and macOS.
 REQUIRED["install/agents.txt"] = ["requirements-analyst", "csharp-expert-developer", "angular-typescript-developer",
-                                  "qa-automation-engineer", "senior-code-reviewer"]
+                                  "qa-automation-engineer", "senior-code-reviewer", "securitycode"]
 REQUIRED["install/install.sh"] = ["install/agents.txt", "install/pins.txt", "skills add", "install-scope", "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE", "model_auto_compact_token_limit", "Node.js 22.20", "Rerunning is safe.", ".bak-"]
 REQUIRED["install/install.ps1"] = REQUIRED["install/install.sh"]
 REQUIRED["README.md"] += ["install/install.ps1 | iex", "install/install.sh | bash", "install/pins.txt", "v3.5.1", "tests/installer_e2e.sh", "tests/installer_e2e.ps1"]
@@ -163,7 +163,7 @@ REQUIRED["examples/prd/invoice-approval/invoice-approval.md"] = REQUIRED["exampl
 import json
 try:
     cfg = json.loads((root / ".mydevfactory.json").read_text(encoding="utf-8"))
-    for role in ("analyst", "backend", "frontend", "qa", "reviewer"):
+    for role in ("analyst", "backend", "frontend", "qa", "reviewer", "securitycode"):
         a = cfg["agents"][role]
         for key in ("model", "effort"):
             for host in ("claude", "codex"):
@@ -248,8 +248,8 @@ if pins_path.is_file():
             errors.append(f"install/pins.txt:{n} unknown kind {kind}")
     if not hub or hub[0] != "mydevfactory":
         errors.append("install/pins.txt hub repo must be mydevfactory")
-    if len(agents) != 8:
-        errors.append(f"install/pins.txt has {len(agents)} agents, expected 8")
+    if len(agents) != 9:
+        errors.append(f"install/pins.txt has {len(agents)} agents, expected 9")
 if agents_path.is_file() and agents:
     listed = []
     for raw in agents_path.read_text(encoding="utf-8").splitlines():

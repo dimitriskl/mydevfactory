@@ -7,3 +7,4 @@ senior-code-reviewer
 ui-ux-developer
 software-architect
 data-analyst-bi-expert
+securitycode

@@ -78,6 +78,10 @@ Round 1 · senior-code-reviewer · FAIL
 Round 2 · senior-code-reviewer · PASS
 - Backend: audit row now saved in the same transaction (`ApproveInvoiceHandler.cs:42-51`). Green tests do not prove behavior under database failover.
 
+## Security review notes
+
+<!-- Record securitycode verdict, scope, evidence, findings, remediation and review limits. -->
+
 ## QA notes
 
 Round 1 · qa-automation-engineer · PASS
@@ -99,6 +103,11 @@ Criteria with no automated test: none
 - Not proved (blind spots): behavior under database failover during approval
 - Decision: ACCEPT — reason: invariants covered by the parallel-approval test
 - Signed: Example Developer · 2026-11-04 · reviewed commit 3f2a1c9
+
+## Workflow evidence
+
+| Role | Agent | Result | Revision | Evidence |
+| --- | --- | --- | --- | --- |
 
 ## History
 

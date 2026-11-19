@@ -21,7 +21,7 @@ The orchestrator is the **main session running this skill**. It never writes pro
 Use these exact strings.
 
 - **Part status** (in each `Backend part` / `Frontend part`): `To do` → `Developing` → `Developed`.
-- **Slice status** (header `Status:`): `To do` → `In development` → `In review` → `In QA` → `Completed`, plus `Blocked: needs clarification`.
+- **Slice status** (header `Status:`): `To do` → `In development` → `In review` → `In security review` → `In QA` → `Completed`, plus `Blocked: needs clarification`.
 
 A status that is **not in the transition table** (for example, hand-edited) is invalid: stop and ask the developer what it should be. Never guess.
 
@@ -37,10 +37,13 @@ Every allowed move. Any other move is invalid and the orchestrator rejects it.
 | Part `Developing` | done with evidence | Part `Developed` | developer |
 | Slice `To do` | first part starts | `In development` | orchestrator |
 | Slice `In development` | all parts `Developed` | `In review` | orchestrator |
-| `In review` | reviewer PASS | `In QA` | orchestrator (after reviewer verdict) |
+| `In review` | reviewer PASS or role disabled in JSON | `In security review` | orchestrator |
+| `In security review` | securitycode PASS or role disabled in JSON | `In QA` | orchestrator |
+| `In security review` | securitycode FAIL | affected part(s) `To do`, slice `In development` | orchestrator |
 | `In review` | reviewer FAIL | failed part(s) `To do`, slice `In development` | orchestrator |
-| `In QA` | QA PASS | `Completed` | orchestrator (after QA verdict) |
+| `In QA` | QA PASS or role disabled in JSON, and workflow evidence check passes | `Completed` | orchestrator |
 | `In QA` | QA FAIL | affected part(s) `To do`, slice `In development` | orchestrator |
+| Open slice, including a resumed one | earlier required evidence missing or invalidated | earliest applicable stage with missing or stale evidence | orchestrator (record reason and preserve history) |
 | any | open question | `Blocked: needs clarification`, header `Blocked from: <status> · question: <ref>` | orchestrator |
 | `Blocked: needs clarification` | developer answered | the status in `Blocked from:` (then clear that line) | orchestrator |
 | any | 3rd failure | `Blocked: needs clarification` with `Blocked from:` (escalate) | orchestrator |
@@ -54,10 +57,11 @@ Every allowed move. Any other move is invalid and the orchestrator rejects it.
 | analyst | PRD file, slice files, `CONTEXT.md`, ADRs in `docs/adr/` | production code, tests |
 | backend / frontend | its part's **Owned files** and their tests; its own `Part status` and `Evidence:` block; one History line | other parts, slice `Status:`, verdicts, the Contract |
 | reviewer | **only the slice file**: its verdict, `Review notes`, one History line | source code, tests, any other file |
+| securitycode | evidence report returned to orchestrator for `Security review notes` and History | all files, external systems |
 | qa | **only the slice file**: its verdict, `QA notes`, one History line | source code, tests, any other file |
 | orchestrator | slice `Status:`, `Failures:`, `Questions & answers`, `Change requests`, the PRD `Slices` index and `Developer sign-off` | production code (while a specialist is callable) |
 
-The orchestrator moves a slice only after checking the evidence is written in the file: the part's `Evidence:` block (`command | exit code | key output`) for `Developed`, a verdict with findings for review, and a per-criterion table for QA.
+The orchestrator moves a slice only after checking the evidence is written in the file: the part's `Evidence:` block (`command | exit code | key output`) for `Developed`, a verdict with findings for review, security verdict with scope and limitations, and a per-criterion table for QA. Use the applicable role decisions and checker in `workflow-evidence.md`.
 
 ## Fresh agent prompts
 
@@ -66,6 +70,7 @@ Every run is a **fresh agent**. Never rely on conversation history, because Code
 - **Analyst:** the request, the developer's answers so far, domain docs, relevant code paths. Do the work in `references/analyst-playbook.md`. Return the files written and the open questions, each with a recommended answer.
 - **Backend / frontend:** "Implement only your part of `<slice file>` against its Contract. Read the PRD, the slice, and any Review/QA notes and Change requests addressed to your part. Set your part to `Developing`; when every test command passed, fill your part's `Evidence:` block (`command | exit code | key output`) and set it to `Developed`. Add one History line. If you need a file outside your Owned files, stop and return a question instead of editing it. Return: changed files, the same evidence, assumptions, questions. Do not commit or stage."
 - **Reviewer:** "Review the diff `<range>` for `<slice file>` against its Contract and acceptance criteria. Edit only this slice file: verdict, Review notes, History. Write PASS or FAIL per part, with `severity | file:line | failure scenario | what must be done`, and what the green checks don't prove."
+- **Securitycode:** "Review the candidate diff and relevant files for security. Return PASS, FAIL or NOT RUN with inspected scope, any evidence-backed findings, recommended remediation and limits. Do not edit files."
 - **QA:** "Run the build and test commands, then exercise the feature against every acceptance criterion: happy path, edge, failure, and loading/empty/error states for UI. Edit only this slice file: verdict, QA notes table, criteria with no automated test, History. Write no code."
 
 If a mapped reviewer or QA agent can't write files, the orchestrator records its returned verdict verbatim, labelled `Verdict by <agent>, recorded by orchestrator`.
@@ -81,7 +86,7 @@ Agents stop only when something is unclear and changes what gets built. A subage
 
 ## Retry cap
 
-`Failures: n/3` counts review FAILs, QA FAILs and post-merge check failures together. On the **3rd** failure, set `Blocked: needs clarification`, summarise the three rounds for the developer, and wait.
+`Failures: n/3` counts review FAILs, security review FAILs, QA FAILs and post-merge check failures together. On the **3rd** failure, set `Blocked: needs clarification`, summarise the three rounds for the developer, and wait.
 
 ## Branches and commits
 
@@ -94,7 +99,7 @@ Agents stop only when something is unclear and changes what gets built. A subage
 
 ## Parallel worktrees
 
-Within one working tree, the **parts run one after another** (backend, then frontend), never at the same time, so each run's changes can be checked on their own. Two parts of the same slice run in parallel only in separate worktrees.
+Within a slice, the **parts run one after another** in role order (backend, then frontend). Parallel worktrees are reserved for independent slices.
 
 When **two or more slices are ready and independent** (no `Blocked by` link between them, and no overlapping Owned files), ask the developer whether to run them in parallel. On yes:
 
@@ -118,13 +123,14 @@ A new session rebuilds the board from the files, never from memory:
 
 1. Read every `prd/*/prd-tasks/*.md` header (`Status:`, `Blocked by:`, `Failures:`) and each part status.
 2. Run `git worktree list`. For each worktree on a `feature/<prd-name>-<slice-id>` branch, read that worktree's copy of the slice file instead.
-3. Report the board to the developer in one line per slice, then continue with the next ready slice.
+3. Add the Workflow evidence section to open cards or slices that predate it. Keep older reports in the notes. Validate evidence against the current role map, contract, acceptance criteria and candidate. Return an open slice to the earliest required stage without valid evidence and record why in History.
+4. Report the board to the developer in one line per slice, then continue with the next ready slice.
 
 ## Context checkpoints
 
 Models get less reliable as their context fills; past about 40% used, they start to miss earlier decisions. Two rules keep every agent below that line:
 
-- **One job, one fresh agent.** A job is the analysis, one part of one slice, one review or one QA run. Every **new job** starts in a fresh agent; a job is never handed to an agent that already did another one.
+- **One job, one fresh agent.** A job is the analysis, one part of one slice, one review, security review or QA run. Every **new job** starts in a fresh agent; a job is never handed to an agent that already did another one.
 - **Auto-compact at 40% while a job runs.** If an agent (the orchestrator included) reaches 40% context used before its job is done, it compacts and continues the same job. It is not replaced mid-job.
 
 Auto-compaction is a host setting; the skill can't change it from markdown. In Phase 0, check once whether it is set and, if not, tell the developer the exact setting:
@@ -148,7 +154,7 @@ Keep command output small: show only the lines that prove a result (exit code, t
 
 1. **HEAD must not have moved.** Agents never commit or stage. If HEAD moved, stop and ask the developer; do not reset anything yourself.
 2. **Changed paths** = `git diff --name-only <base sha>` plus new untracked files in `git status --porcelain`. Judge only paths that changed during this run, and **never revert a path that was already** modified or untracked in the snapshot.
-3. **Scope check:** every changed path must be allowed for the role ("Who writes what"): the slice file for reviewer and QA, the part's Owned files and their tests for developers.
+3. **Scope check:** every changed path must be allowed for the role ("Who writes what"): no path for securitycode, the slice file for reviewer and QA, the part's Owned files and their tests for developers.
 4. **Section check:** `git diff <base sha> -- <slice file>` may only touch that role's sections, and History may only gain lines at the end, never lose or rewrite them.
 
 On a violation:

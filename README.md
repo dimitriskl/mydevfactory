@@ -143,7 +143,7 @@ Step 2/7 · src/Auth/TwoFactorService.cs:40-58
 - **Each card** shows where the code is (`file:line`), **what** it does, **why** (the slice and acceptance criterion) and the **tests** written for that step: file and line, test name, what it checks in plain words, its result (PASS / FAIL / NOT RUN) and whether it is new, changed or existing. A step with no test shows `none written — not verified`.
 - **`next` / `back` / `go N`** move through the list; viewed steps get `✓`. **`tests`** shows the code of those tests (arrange, act, assert). **`ask …`** answers from the code and evidence and stays on the step.
 - **Your editor follows along.** When the session runs inside VS Code (terminal or AI pane), each card opens its file at the step's line in your editor (`code -r -g <file>:<line>`; `cursor` for Cursor). **`open 2`** jumps to the card's second location (its first test), and **`editor off`** / **`editor on`** turn this off and back on. Every `file:line` is also Ctrl+clickable in VS Code's terminal. In the AI panes, clicks don't always work yet, which is why the jump exists. Outside VS Code, or if the `code` command is missing, you get the text links only.
-- **`change …`** is saved in that slice file as an `open` change request and the step gets `✎`. You keep walking. At the end, those slices go back to the developer, then review and QA again, and the next Walkthrough shows **only the changed steps**.
+- **`change …`** is saved in that slice file as an `open` change request and the step gets `✎`. You keep walking. At the end, those slices go back to the developer, then review, security review and QA again, and the next Walkthrough shows **only the changed steps**.
 - **`approve all`** skips the rest; the sign-off honestly records which steps you didn't view.
 - **At the end** you see a one-screen summary: steps viewed, change requests, and **blind spots** (what the tests did not prove). Then you choose **ACCEPT** or **REJECT**. ACCEPT is only possible when every slice is Completed and no change request is still open. Your decision is written into the PRD's `Developer sign-off` with your git name, the date and the commit, then the orchestrator offers the merge; you do it.
 
@@ -158,6 +158,7 @@ If you stop halfway, open a new session and continue from the files: `Use mydevf
 - 🔵 **backend**: builds each slice's API part (secret storage, code verification, attempt limits) and records its test evidence.
 - 🟢 **frontend**: builds each slice's screens (QR-code setup, code entry, error states) against the same contract.
 - 🟠 **reviewer**: reviews each slice for bugs and security gaps (secret handling, brute force, bypasses); FAIL sends it back to the developer.
+- 🔴 **securitycode**: independently reviews the change for security risks and returns a verdict with evidence.
 - 🟡 **qa**: checks every acceptance criterion (wrong code, expired code, lockout); PASS marks the slice Completed.
 
 Invoke the installed skill as `/mydevfactory` in Claude Code or `$mydevfactory` in Codex. Start a new session after installation so the agent discovers it.
@@ -176,25 +177,27 @@ The CLI and agent availability vary by environment. **Installation does not guar
 | Deadlines encourage rubber-stamping | Cuts ceremony and scope before critical verification |
 | You ship code you never looked at | The **Walkthrough** takes you through the changes step by step before your Developer sign-off |
 
-**It does not require C#, Angular, subagents, or other vendors' skills.** Those are integrations, not dependencies. It works in **Claude Code and Codex CLI**.
+**The workflow supports any stack.** Enabled roles require callable subagents. It works in **Claude Code and Codex CLI**.
 
 ## How it works
 
 ```mermaid
 flowchart TD
   A[Your request + repository] --> B{Risk and scope?}
-  B -->|Small fix| C[Fix: owning developer + regression test]
+  B -->|Small fix| C[Analyst: task card + acceptance checks]
   B -->|Feature| D[Analyst: PRD + slice files in prd/]
-  D --> E[Developer agents: one fresh agent per part]
-  C --> R
+  D --> E[Fresh assignments to enabled developer roles]
+  C --> E
   E --> R[Reviewer: PASS / FAIL written in the slice file]
   R -->|FAIL| E
-  R -->|PASS| Q[QA: checks every acceptance criterion]
+  R -->|PASS or disabled| S[Securitycode: security review]
+  S -->|FAIL| E
+  S -->|PASS or disabled| Q[QA: checks every acceptance criterion]
   Q -->|FAIL| E
-  Q -->|PASS| M[Merge slice + integration check]
+  Q -->|PASS or disabled, evidence checked| M[Merge slice + integration check]
   M --> G[Walkthrough: step by step]
-  G --> S[Developer sign-off: ACCEPT / REJECT]
-  S --> H[You merge to main and release]
+  G --> V[Developer sign-off: ACCEPT / REJECT]
+  V -->|ACCEPT| H[You merge to main and release]
 ```
 
 The skill reuses what your repo already has (existing PRDs, specs and issues are converted, not duplicated). A 10-minute fix does not need a PRD.
@@ -215,13 +218,13 @@ Ship checks the contract, the evidence, rollback and monitoring, then asks you f
 
 **Risk levels.** Each slice gets a risk level, which sets how much process it goes through:
 
-- **L0**: wording, styles, comments or a trivial local change. One relevant check, no review or QA rounds.
+- **L0**: wording, styles, comments or a trivial local change. Use a short check and run all configured roles.
 - **L1**: an ordinary, contained feature or bug fix. Targeted tests, review and QA.
 - **L2**: authentication, money, personal data, public API contracts, destructive migrations, concurrency or production safety. Explicit invariants, failure-path tests and a separate sign-off for each slice. A deadline never lowers L2 to L0.
 
 ### Who is working right now
 
-The skill prints a line each time an agent starts or finishes, and says whether a separate agent really ran or the main agent did the work as a fallback. Every message also starts with **who is speaking**, and each role has its own color marker, so you never have to guess which agent wrote a paragraph. The brackets show the model and effort that run actually used, for example `🟣 analyst [opus, high] (requirements-analyst):`:
+The skill prints a line each time an agent starts or finishes, and shows which roles are disabled in the project configuration. Every message also starts with **who is speaking**, and each role has its own color marker, so you never have to guess which agent wrote a paragraph. The brackets show the model and effort that run actually used, for example `🟣 analyst [opus, high] (requirements-analyst):`:
 
 | Marker | Role |
 | --- | --- |
@@ -229,6 +232,7 @@ The skill prints a line each time an agent starts or finishes, and says whether 
 | 🔵 backend | builds the backend part |
 | 🟢 frontend | builds the frontend part |
 | 🟠 reviewer | reviews each slice |
+| 🔴 securitycode | independently reviews security |
 | 🟡 qa | checks the acceptance criteria |
 | ⚪ orchestrator | the main session: routing, integration, your sign-off |
 
@@ -241,8 +245,8 @@ The skill prints a line each time an agent starts or finishes, and says whether 
 🟣 analyst [opus, high] (requirements-analyst) · Question 1/2: Should the key survive a restart? Recommended: yes, stored outside the app folder.
 🔵 ▶ Now working: backend [sonnet, medium] (csharp-expert-developer) · slice 001 · subagent `backend_s001` started
 🔵 ✓ Done: backend [sonnet, medium] (csharp-expert-developer) · 3 files, dotnet test PASS
-🟠 ▶ Now working: reviewer [session] (main agent) · review · FALLBACK, not independent
-⚪ orchestrator [sonnet, medium]: Slice 001 is in review; nothing needs your input yet.
+🔴 ▶ Now working: securitycode [opus, high] (securitycode) · review · subagent `securitycode_s001` started
+⚪ orchestrator [sonnet, medium]: Slice 001 is in security review.
 ```
 
 The markers are plain emoji, so they show the same in Claude Code and Codex CLI. Each subagent run gets a readable name (`<role>_<slice>`). When Codex prints its own line, such as "Interacted with `/root/backend_s001`", the line just before it (`🔵 ▶ Now working: backend [sonnet, medium] (csharp-expert-developer) · slice 001 · subagent `backend_s001` started`) tells you which agent that is. Lines the host tool prints itself (such as "Waiting for agents") come from the tool, not the skill, and have no marker.
@@ -253,7 +257,7 @@ The markers are plain emoji, so they show the same in Claude Code and Codex CLI.
 
 ```text
 Delivered: Fixed duplicate webhook processing
-Agents: backend specialist invoked; reviewer unavailable (self-review fallback)
+Agents: analyst, backend, frontend, reviewer, securitycode and QA completed; frontend recorded NOT APPLICABLE
 Evidence: dotnet test ... — PASS (14 tests)
 Proved: duplicate sequential deliveries create one order
 NOT proved: two workers racing or ERP commit followed by timeout
@@ -279,13 +283,14 @@ your-project/
 
 Each slice moves through a kanban, and every step runs in a **fresh agent** that works from the files alone:
 
-`To do → In development → In review → In QA → Completed` (or `Blocked: needs clarification`)
+`To do → In development → In review → In security review → In QA → Completed` (or `Blocked: needs clarification`)
 
 - **Analyst** writes the PRD and slices (each fully implementable: exact files, contract, test commands).
 - **Backend / frontend developers** build only their own part against the slice's written Contract, fill in its `Evidence:` block (`command | exit code | output`) and mark it `Developed`. Within one working tree the parts run one after another.
 - **Reviewer** writes PASS or FAIL into the slice file; FAIL goes back to the developer with what must be done.
+- **Securitycode** returns a separate security verdict. A FAIL returns the issue to the owning developer.
 - **QA** checks every acceptance criterion and writes PASS or FAIL; FAIL goes back to the developer.
-- After **3 failures** on one slice (review, QA or the post-merge check), the orchestrator stops and asks you. A blocked slice records `Blocked from:` so it can resume exactly where it stopped.
+- After **3 failures** on one slice (review, security review, QA or the post-merge check), the orchestrator stops and asks you. A blocked slice records `Blocked from:` so it can resume exactly where it stopped.
 - Independent slices can run **in parallel git worktrees**, only if you say yes.
 - Work happens on `feature/<prd-name>`, created before the analyst runs; the starting point is recorded as `Base:` in the PRD. Nothing is merged to `main` or pushed for you.
 - **Your own work is safe.** If you have uncommitted changes, the orchestrator asks you to stash, commit or stop before any agent runs. Before every agent run it records a snapshot (HEAD + `git status`); afterwards it checks that the agent only touched what its role allows, reverts anything else from that run only, and allows one corrective re-run before asking you.
@@ -305,6 +310,7 @@ The skill works with any agents. These are the ones it was built and tested with
 | `backend` | csharp-expert-developer | Builds the backend part of each slice (.NET) | [repo](https://github.com/dimitriskl/csharp-expert-developer) |
 | `frontend` | angular-typescript-developer | Builds the frontend part of each slice (Angular) | [repo](https://github.com/dimitriskl/angular-typescript-developer) |
 | `qa` | qa-automation-engineer | Checks every acceptance criterion, read-only; writes its own verdict | [repo](https://github.com/dimitriskl/qa-automation-engineer) |
+| `securitycode` | securitycode | Reviews code security and reports findings without changing code | [repo](https://github.com/dimitriskl/securitycode) |
 | `reviewer` | senior-code-reviewer (v1.2.0) | Reviews each slice, read-only except its own verdict | [repo](https://github.com/dimitriskl/senior-code-reviewer) |
 
 Also available: [ui-ux-developer](https://github.com/dimitriskl/ui-ux-developer) (an alternative `frontend` focused on UX and accessibility), [software-architect](https://github.com/dimitriskl/software-architect) (for design questions outside the board) and [data-analyst-bi-expert](https://github.com/dimitriskl/data-analyst-bi-expert) (an alternative `analyst` for data-heavy and BI work).
@@ -340,6 +346,11 @@ Each repository's README shows how to install the agent for one project (`.claud
       "name": "senior-code-reviewer",
       "model": { "claude": "opus", "codex": "gpt-6.1-sol" },
       "effort": { "claude": "high", "codex": "high" }
+    },
+    "securitycode": {
+      "name": "securitycode",
+      "model": { "claude": "opus", "codex": "gpt-6.1-sol" },
+      "effort": { "claude": "high", "codex": "high" }
     }
   }
 }
@@ -350,8 +361,9 @@ Each repository's README shows how to install the agent for one project (`.claud
 | Role | Claude Code | Codex | Why |
 | --- | --- | --- | --- |
 | `analyst` | opus · high | gpt-6.1-sol · high | Wrong requirements make every later step wrong |
-| `reviewer` | opus · high | gpt-6.1-sol · high | The last independent check before QA and your sign-off |
+| `reviewer` | opus · high | gpt-6.1-sol · high | Independent correctness and requirements review |
 | `backend`, `frontend` | sonnet · medium | gpt-6.1-terra · medium | Builds from a complete contract, owned files and test commands |
+| `securitycode` | opus · high | gpt-6.1-sol · high | Independent security review before QA |
 | `qa` | sonnet · low | gpt-6.1-terra · low | Runs the listed checks against written acceptance criteria |
 
 - **Change one run** without editing the file: start your prompt with a line such as `reviewer: opus high`.
@@ -362,11 +374,13 @@ Each repository's README shows how to install the agent for one project (`.claud
 - **Settings that win over the file:** in Claude Code, the `CLAUDE_CODE_EFFORT_LEVEL` and `CLAUDE_CODE_SUBAGENT_MODEL_FORCE` environment variables; in Codex, a `model` line inside an agent's own `.toml` file (the agents above have none). The orchestrator warns you if one is set.
 - The orchestrator itself is your main session, so its model is the one you choose when you start (`/model`). It only reads the board, so a mid-level model is usually enough.
 
-**Using other agents?** Replace each `name` with your own agent's name. The roles are `analyst`, `backend`, `frontend`, `qa` and `reviewer`; for each, only `name`, `model` and `effort` are read. Leave a role out if you have no agent for it.
+**Upgrading an existing project?** The installer preserves your JSON. Add the `securitycode` block shown above to enable the new gate. A fresh v4 installation includes the mapping. The installation commands above target the published v3.5.1 until v4 is released.
 
-The reviewer and QA write their verdicts into the slice file themselves, so they need permission to edit files (in Codex, a `workspace-write` sandbox). The orchestrator checks that they changed nothing else. If a reviewer can't edit files, the orchestrator records its verdict word for word, labelled with the agent's name.
+**Using other agents?** Replace each `name` with your own agent's name. MyDevFactory runs each configured role in order for changes, including small edits and deadlines. Omit a role or leave its name blank to skip only that step. A named agent that cannot run blocks that step. Backend and frontend each inspect the task and record why their work is inapplicable when appropriate. QA begins after the configured code and security reviews pass. The skill checks the evidence before accepting completion. See [required roles and evidence](skills/mydevfactory/references/workflow-evidence.md).
 
-**A config file does not create subagents.** If an agent isn't installed or can't be invoked, the main agent does that step itself and labels it `FALLBACK, not independent`. No third-party planning skills are needed.
+Securitycode returns its verdict for the orchestrator to record. The reviewer and QA write their verdicts into the slice file themselves, so they need permission to edit files (in Codex, a `workspace-write` sandbox). The orchestrator checks that they changed nothing else. If a reviewer can't edit files, the orchestrator records its verdict word for word, labelled with the agent's name.
+
+**Install the named agents and make Python 3 available for the workflow evidence check.** Start the skill explicitly for change work.
 
 ## Manual installation (no Node required)
 
@@ -404,7 +418,7 @@ Use the corresponding destination for your agent. Restart its session, then invo
 
 Check [CHANGELOG.md](CHANGELOG.md) first. A new major version (for example 2.x → 3.0.0) can change how the skill works or what `.mydevfactory.json` contains.
 
-**If you installed with the MyDevFactory installer**, update the skill **and all eight pinned agents** using the matching updater (Node.js 22.20 or later), from tag `v3.5.1`:
+**If you installed with the MyDevFactory installer**, update the skill **and all pinned agents** using the matching updater (Node.js 22.20 or later), from tag `v3.5.1`:
 
 ```powershell
 $env:EJ_REF = 'v3.5.1'
@@ -419,7 +433,7 @@ From a checkout of that tag, run `bash install/update.sh` or `pwsh -File install
 
 The installer records the installed skill repository and resolved commit in `.engineering-judgment/skill-pin.json` under the chosen scope. Use the installer or updater above to update this skill: generic `skills update` does not track its temporary checkout. The receipt describes the last successful skill installation; it does not verify later local edits.
 
-**If you installed directly with `npx skills add` (not the MyDevFactory installer)** (Node.js 22.20 or later), use the Agent Skills CLI to check or update the skill only. These commands do **not** update the eight agent definitions installed by the MyDevFactory installer:
+**If you installed directly with `npx skills add` (not the MyDevFactory installer)** (Node.js 22.20 or later), use the Agent Skills CLI to check or update the skill only. These commands do **not** update the agent definitions installed by the MyDevFactory installer:
 
 ```bash
 npx skills check                          # shows whether an update is available

@@ -31,19 +31,23 @@ Give the reviewer the diff range, the **original changed files**, the slice file
 - **Writes its own verdict into the slice file**: PASS or FAIL per part, then findings in severity order (`severity | file:line | failure scenario | evidence | what must be done`), implicit assumptions and scope changes, and what the passing tests do and do **not** establish. Also one History line.
 - **Never** edits source code, tests, or any file other than the slice file.
 
+## Independent security review request
+
+Give securitycode the candidate diff, original files, contract, and relevant check output. Ask it to inspect security-sensitive paths and trust boundaries, then return its own PASS, FAIL or NOT RUN with inspected scope, locations, impact, remediation and limits. It edits no files. The orchestrator records the returned text in Security review notes and sends findings to the owning developer.
+
 ## QA request
 
 Give QA the slice file, the changed files, and the exact build/test/run commands.
 
 - **Runs** the existing build and test suites, then exercises the running feature against each acceptance criterion: happy path, edge cases, failure paths, and loading/empty/error states for UI.
 - **Writes its own verdict into the slice file**: PASS or FAIL, the table `criterion | how checked | PASS / FAIL / NOT RUN | evidence`, defects with reproduction steps, criteria with no automated test, and one History line.
-- **Never** writes code: no tests and no fixes. Defects and missing tests go back to the owning developer, and QA re-runs the affected criteria after the fixes.
+- **Never** writes code: no tests and no fixes. Defects and missing tests go back to the owning developer, and enabled review, securitycode and QA agents check the updated candidate.
 
 ## Enforcing write scope
 
 Before every agent run, the orchestrator records HEAD and `git status --porcelain`; afterwards it checks `git diff --name-only <base sha>` plus new untracked files against what that role may write, and never touches paths that were already dirty before the run. Out-of-scope changes are reverted, logged in History as a violation, and the step gets one corrective re-run with a fresh agent; a second violation blocks the slice and asks the developer. If a mapped reviewer or QA agent can't write files at all, the orchestrator writes its returned verdict verbatim, labelled `Verdict by <agent>, recorded by orchestrator`.
 
-If the host cannot invoke a separate agent, the orchestrator does the step itself and labels it `FALLBACK, not independent`.
+If a named role cannot be dispatched, record the blocker. Only roles disabled in the project JSON may be recorded as SKIPPED.
 
 ## Integration owner
 
@@ -51,8 +55,8 @@ The orchestrator merges `Completed` slices and verifies shared API contracts, ov
 
 ## Final status
 
-- `SIGNED OFF (ACCEPT)`: every slice Completed, integrated, and accepted by the developer after the Walkthrough. Still **not** deployment approval.
+- `SIGNED OFF (ACCEPT)`: all slices or the Fix task passed the workflow and integration checks and were accepted by the developer after the Walkthrough. Still **not** deployment approval.
 - `REJECTED`: the developer rejected the sign-off; the reason is recorded in the PRD.
 - `BLOCKED`: an unresolved question, or a slice that hit the retry cap.
 - `NOT VERIFIED`: code exists but the required evidence is missing.
-- In Fix and Audit modes, `READY FOR HUMAN REVIEW` means an evidenced candidate for the developer's review.
+- In Audit mode, `READY FOR HUMAN REVIEW` means an evidenced candidate for the developer's review.

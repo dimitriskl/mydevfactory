@@ -18,4 +18,4 @@ Numbers are rough planning defaults, **not stopwatch guarantees**. If clock/time
 
 **Finish:** `Outcome | observed checks | strongest blind spot | deferred work | human decision`. No quiz questions; drills happen only in Drill mode.
 
-**Full feature under Deadline:** every slice still gets review and QA, but with **one fix round only**; anything unresolved is flagged in the handoff.
+**Change under Deadline:** every task still runs all configured roles in order, but with **one fix round only**; anything unresolved is flagged in the handoff.

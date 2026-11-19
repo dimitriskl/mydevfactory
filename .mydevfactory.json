@@ -24,6 +24,11 @@
       "name": "senior-code-reviewer",
       "model": { "claude": "opus", "codex": "gpt-6.1-sol" },
       "effort": { "claude": "high", "codex": "high" }
+    },
+    "securitycode": {
+      "name": "securitycode",
+      "model": { "claude": "opus", "codex": "gpt-6.1-sol" },
+      "effort": { "claude": "high", "codex": "high" }
     }
   }
 }
