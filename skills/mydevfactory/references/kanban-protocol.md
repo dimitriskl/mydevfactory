@@ -123,7 +123,7 @@ A new session rebuilds the board from the files, never from memory:
 
 1. Read every `prd/*/prd-tasks/*.md` header (`Status:`, `Blocked by:`, `Failures:`) and each part status.
 2. Run `git worktree list`. For each worktree on a `feature/<prd-name>-<slice-id>` branch, read that worktree's copy of the slice file instead.
-3. Add the Workflow evidence section to open cards or slices that predate it. Keep older reports in the notes. Validate evidence against the current role map, contract, acceptance criteria and candidate. Return an open slice to the earliest required stage without valid evidence and record why in History.
+3. Add the Workflow evidence section to open cards or slices that predate it. Keep older reports in the notes. Validate evidence against the trusted role map, contract, acceptance criteria and candidate. Return an open slice to the earliest required stage without valid evidence and record why in History.
 4. Report the board to the developer in one line per slice, then continue with the next ready slice.
 
 ## Context checkpoints
