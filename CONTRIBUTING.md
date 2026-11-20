@@ -43,7 +43,7 @@ The installer checks out the resolved hub commit before passing its local tree t
 
 The config rename requires a release pin to a commit containing the updated skill: historical pins contain a skill that still reads the legacy filename. Complete the post-merge pin bump before releasing this rename. The installer can retrieve defaults from older pins, but that does not update the old skill.
 
-To release the hub, merge the change, then set the hub line in `install/pins.txt` to that merge commit, commit the pin bump, and tag **the pin-bump commit** (for example `v3.5.0`). A commit can't pin itself, so tagging the merge would still install the previous skill. Install from tag `v3.5.0` after that tag is created. The README commands use that tag and assume it already exists; do not point users at `main`. When an agent release merges, replace that agent's SHA with its release commit.
+To release the hub, merge the change, then set the hub line in `install/pins.txt` to that merge commit, commit the pin bump, and tag **the pin-bump commit** (for example `v3.5.0`). A commit can't pin itself, so tagging the merge would still install the previous skill. Pin the README commands to an existing release tag or a verified full commit SHA. Do not point public install commands at `main`. When an agent release merges, replace that agent's SHA with its release commit.
 
 `--ref` and `EJ_REF` accept a tag, a full commit SHA, or a branch. A branch or tag is resolved to a commit SHA before download, including a branch name that contains a slash. The user README recommends a tag or a full SHA.
 
