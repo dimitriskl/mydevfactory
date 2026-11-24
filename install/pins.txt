@@ -6,7 +6,7 @@
 
 hub mydevfactory f4315cd83507cbf1235ed6a6f0907d7c71da82f1
 agent requirements-analyst cc3853dafc649b7ecb4647810a762a874b56a9da
-agent csharp-expert-developer cf0f4c704931b80d5530bf75f4cb1bbeac064750
+agent csharp-expert-developer dd34eb40876265baeb149af16af49c160deca537
 agent angular-typescript-developer 1060c0a1e613d72ea6d034fc75969999f4bb7cd6
 agent qa-automation-engineer c0fe1a47989c9217b9c95413c4396a55d42df9dd
 agent senior-code-reviewer 252bb4c6b736f492ded16293f5b274ee47b08b43
