@@ -21,13 +21,13 @@ Install Git and [Node.js 22.20 or later](https://nodejs.org) first. The Bash com
 
 ```bash
 # Linux and macOS
-ref=v4.0.2
+ref=210049d36f8e276ba4ac41a8a212ad1d09abffda
 curl -fsSL "https://raw.githubusercontent.com/dimitriskl/mydevfactory/$ref/install/install.sh" | bash -s -- --ref "$ref"
 ```
 
 ```powershell
 # Windows (PowerShell)
-$env:EJ_REF = 'v4.0.2'
+$env:EJ_REF = '210049d36f8e276ba4ac41a8a212ad1d09abffda'
 irm "https://raw.githubusercontent.com/dimitriskl/mydevfactory/$env:EJ_REF/install/install.ps1" | iex
 ```
 
@@ -41,9 +41,9 @@ Prefer to read the script first? Download a separate checkout of MyDevFactory, t
 
 ```bash
 git clone https://github.com/dimitriskl/mydevfactory.git ~/src/mydevfactory
-git -C ~/src/mydevfactory checkout --detach v4.0.2
+git -C ~/src/mydevfactory checkout --detach 210049d36f8e276ba4ac41a8a212ad1d09abffda
 cd /path/to/your/project
-bash ~/src/mydevfactory/install/install.sh --ref v4.0.2
+bash ~/src/mydevfactory/install/install.sh --ref 210049d36f8e276ba4ac41a8a212ad1d09abffda
 ```
 
 On Windows, run the checked-out `install/install.ps1` from your project folder with `EJ_REF` set as in the PowerShell quick start.
@@ -398,7 +398,7 @@ Example (macOS/Linux):
 
 ```bash
 git clone https://github.com/dimitriskl/mydevfactory.git
-git -C mydevfactory checkout --detach v4.0.2
+git -C mydevfactory checkout --detach 210049d36f8e276ba4ac41a8a212ad1d09abffda
 mkdir -p YourProject/.agents/skills
 cp -R mydevfactory/skills/mydevfactory YourProject/.agents/skills/
 ```
@@ -407,7 +407,7 @@ Example (PowerShell):
 
 ```powershell
 git clone https://github.com/dimitriskl/mydevfactory.git
-git -C mydevfactory checkout --detach v4.0.2
+git -C mydevfactory checkout --detach 210049d36f8e276ba4ac41a8a212ad1d09abffda
 New-Item -ItemType Directory -Force C:\src\YourProject\.claude\skills | Out-Null
 Copy-Item -Recurse .\mydevfactory\skills\mydevfactory C:\src\YourProject\.claude\skills\
 ```
@@ -423,12 +423,12 @@ Check [CHANGELOG.md](CHANGELOG.md) first. A new major version (for example 2.x â
 **If you installed with the MyDevFactory installer**, update the skill **and all pinned agents** using the matching updater from your project folder. The updater requires Git and Node.js 22.20 or later.
 
 ```powershell
-$env:EJ_REF = 'v4.0.2'
+$env:EJ_REF = '210049d36f8e276ba4ac41a8a212ad1d09abffda'
 irm "https://raw.githubusercontent.com/dimitriskl/mydevfactory/$env:EJ_REF/install/update.ps1" | iex
 ```
 
 ```bash
-ref=v4.0.2
+ref=210049d36f8e276ba4ac41a8a212ad1d09abffda
 curl -fsSL "https://raw.githubusercontent.com/dimitriskl/mydevfactory/$ref/install/update.sh" | bash -s -- --ref "$ref"
 ```
 
@@ -452,7 +452,7 @@ macOS / Linux:
 
 ```bash
 git -C mydevfactory fetch --tags
-git -C mydevfactory checkout --detach v4.0.2
+git -C mydevfactory checkout --detach 210049d36f8e276ba4ac41a8a212ad1d09abffda
 rm -rf YourProject/.agents/skills/mydevfactory
 cp -R mydevfactory/skills/mydevfactory YourProject/.agents/skills/
 ```
@@ -461,7 +461,7 @@ PowerShell:
 
 ```powershell
 git -C .\mydevfactory fetch --tags
-git -C .\mydevfactory checkout --detach v4.0.2
+git -C .\mydevfactory checkout --detach 210049d36f8e276ba4ac41a8a212ad1d09abffda
 Remove-Item -Recurse -Force C:\src\YourProject\.claude\skills\mydevfactory
 Copy-Item -Recurse .\mydevfactory\skills\mydevfactory C:\src\YourProject\.claude\skills\
 ```
