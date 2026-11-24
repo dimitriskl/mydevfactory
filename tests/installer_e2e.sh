@@ -649,6 +649,23 @@ assert_grep "$OUT" "Scope: personal (" "another folder defaults to personal scop
 assert_no_grep "$OUT" "Scope: project (" "another folder does not announce project scope"
 clean_tree "$PROJ_B" "another folder receives no project files"
 
+# In the home folder, the folder's scope file is the personal scope file, never a project marker.
+HOME_RUN="$CASE/home-run"
+mkdir -p "$HOME_RUN/.engineering-judgment"
+printf '%s\n' personal > "$HOME_RUN/.engineering-judgment/install-scope"
+launch "$HOME_RUN" "$HOME_RUN" "$OUT" "$ERR" env EJ_RAW_ROOT="http://127.0.0.1:9" bash "$INSTALL"
+assert_status "a run from the home folder reaches the download step" 1 "$OUT" "$ERR"
+assert_grep "$OUT" "Scope: personal (" "a run from the home folder uses the remembered personal scope"
+assert_no_grep "$ERR" "must contain project" "a run from the home folder does not read the personal file as a project marker"
+launch "$HOME_RUN" "$HOME_RUN" "$OUT" "$ERR" bash "$INSTALL" --scope project
+assert_status "project scope in the home folder is refused" 2 "$OUT" "$ERR"
+assert_grep "$ERR" "Project scope cannot use your home folder" "the refusal explains the home folder"
+if [ "$(tr -d '\r\n' < "$HOME_RUN/.engineering-judgment/install-scope")" = personal ]; then
+  ok "the personal scope file survives a refused home run"
+else
+  bad "the personal scope file changed"
+fi
+
 echo
 echo "$PASSES passed, $FAILS failed"
 if [ "$FAILS" -ne 0 ]; then exit 1; fi

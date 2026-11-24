@@ -298,10 +298,12 @@ try {
 
     $reason = "chosen"
     $cwd = (Get-Location).Path
+    # In the home folder, the folder's scope file is the personal scope file, so never read it as a project marker.
+    $inHome = [IO.Path]::GetFullPath($cwd).TrimEnd([char]92, [char]47) -ieq [IO.Path]::GetFullPath($UserHome).TrimEnd([char]92, [char]47)
     if (-not $ExplicitScope) {
         $cwdMarker = Join-Path (Join-Path $cwd ".engineering-judgment") "install-scope"
         $globalFile = Join-Path (Join-Path $UserHome ".engineering-judgment") "install-scope"
-        if (Test-Path -LiteralPath $cwdMarker) {
+        if (-not $inHome -and (Test-Path -LiteralPath $cwdMarker)) {
             $markerValue = ([IO.File]::ReadAllText($cwdMarker)).Trim()
             if ($markerValue -ne "project") {
                 Fail "Project scope file $cwdMarker must contain project, not '$markerValue'.`nNothing was installed. Rerunning is safe." 2
@@ -335,6 +337,9 @@ try {
     }
     # Node compares scope case-sensitively when writing metadata and cleaning locks.
     $Scope = $Scope.ToLowerInvariant()
+    if ($Scope -eq "project" -and $inHome) {
+        Fail "Project scope cannot use your home folder: its scope file is the personal one. Run from your project folder, or choose --scope personal.`nNothing was installed. Rerunning is safe." 2
+    }
     $Base = if ($Scope -eq "personal") { $UserHome } else { $cwd }
     if ($reason -eq "default") {
         Write-Output "Scope: personal ($Base). No saved choice and no terminal, so the default is personal. Run again with --scope personal or --scope project to change it."
@@ -532,7 +537,7 @@ fs.writeFileSync(path.join(receiptDir, "skill-pin.json"),
         $scopeDir = Join-Path $UserHome ".engineering-judgment"
         New-Item -ItemType Directory -Force -Path $scopeDir | Out-Null
         [IO.File]::WriteAllText((Join-Path $scopeDir "install-scope"), "personal`n", $utf8)
-        if ($ExplicitScope) {
+        if ($ExplicitScope -and -not $inHome) {
             $cwdMarker = Join-Path (Join-Path $cwd ".engineering-judgment") "install-scope"
             if (Test-Path -LiteralPath $cwdMarker) { Remove-Item -LiteralPath $cwdMarker -Force }
         }
