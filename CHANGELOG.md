@@ -1,6 +1,6 @@
 # Changelog
 
-## 4.0.0 — Required role workflow
+## 4.0.0 — Required role workflow (2026-11-24)
 
 - Add securitycode as a separate security reviewer with Claude Code and Codex model and effort settings.
 - Run every configured role on small, regular, and deadline changes. Missing and blank roles skip only their own steps.
