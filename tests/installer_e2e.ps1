@@ -604,6 +604,20 @@ Assert-Has $c.Out "Scope: personal (" "another folder defaults to personal scope
 Assert-Lacks $c.Out "Scope: project (" "another folder does not announce project scope"
 Assert-Clean $projB "another folder receives no project files"
 
+# In the home folder, the folder's scope file is the personal scope file, never a project marker.
+$h = New-Case
+$homeScopeDir = Join-Path $h.Home ".engineering-judgment"
+New-Item -ItemType Directory -Force -Path $homeScopeDir | Out-Null
+[IO.File]::WriteAllText((Join-Path $homeScopeDir "install-scope"), "personal`n", $utf8)
+$code = Invoke-Install $h $Install @() @{ EJ_RAW_ROOT = "http://127.0.0.1:9" } $null "file" $h.Home
+Assert-Status $code 1 "a run from the home folder reaches the download step" $h
+Assert-Has $h.Out "Scope: personal (" "a run from the home folder uses the remembered personal scope"
+Assert-Lacks $h.Err "must contain project" "a run from the home folder does not read the personal file as a project marker"
+$code = Invoke-Install $h $Install @("--scope", "project") $null $null "file" $h.Home
+Assert-Status $code 2 "project scope in the home folder is refused" $h
+Assert-Has $h.Err "Project scope cannot use your home folder" "the refusal explains the home folder"
+if ((Read-Text (Join-Path $homeScopeDir "install-scope")).Trim() -eq "personal") { Ok "the personal scope file survives a refused home run" } else { Bad "the personal scope file changed" }
+
 Write-Output ""
 Write-Output "$($script:Passes) passed, $($script:Fails) failed"
 # pwsh -Command, which is how Actions runs this file, keeps the last native

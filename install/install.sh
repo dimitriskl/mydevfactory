@@ -428,10 +428,13 @@ fi
 
 # Scope is chosen before downloads. It is written only after a successful install.
 reason="chosen"
+# In the home folder, the folder's scope file is the personal scope file, so never read it as a project marker.
+in_home=0
+if [ "$(pwd -P)" = "$(cd "$HOME" 2>/dev/null && pwd -P)" ]; then in_home=1; fi
 if [ "$EXPLICIT_SCOPE" -eq 0 ]; then
   cwd_marker="$(pwd)/.engineering-judgment/install-scope"
   global_file="$HOME/.engineering-judgment/install-scope"
-  if [ -f "$cwd_marker" ]; then
+  if [ "$in_home" -eq 0 ] && [ -f "$cwd_marker" ]; then
     marker_value="$(tr -d '\r\n' < "$cwd_marker")"
     if [ "$marker_value" != "project" ]; then
       die 2 "Project scope file ${cwd_marker} must contain project, not '${marker_value}'.
@@ -485,6 +488,10 @@ case "$SCOPE" in
   *) die 2 "Scope must be personal or project, not '${SCOPE}'.
 Nothing was installed. Rerunning is safe." ;;
 esac
+if [ "$SCOPE" = "project" ] && [ "$in_home" -eq 1 ]; then
+  die 2 "Project scope cannot use your home folder: its scope file is the personal one. Run from your project folder, or choose --scope personal.
+Nothing was installed. Rerunning is safe."
+fi
 
 if [ "$SCOPE" = "personal" ]; then BASE="$HOME"; else BASE="$(pwd)"; fi
 case "$reason" in
@@ -696,7 +703,7 @@ if [ "$SCOPE" = "project" ]; then
 else
   mkdir -p "$HOME/.engineering-judgment"
   printf '%s\n' personal > "$HOME/.engineering-judgment/install-scope"
-  if [ "$EXPLICIT_SCOPE" -eq 1 ]; then
+  if [ "$EXPLICIT_SCOPE" -eq 1 ] && [ "$in_home" -eq 0 ]; then
     cwd_marker="$(pwd)/.engineering-judgment/install-scope"
     if [ -f "$cwd_marker" ]; then rm -f "$cwd_marker"; fi
   fi

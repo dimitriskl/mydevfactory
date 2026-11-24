@@ -1,5 +1,12 @@
 # Changelog
 
+## 4.0.1 — Installer runs from the home folder
+
+- Running the installer or updater from your home folder no longer stops with "Project scope file … must contain project, not 'personal'". In the home folder, the folder's scope file is the personal one, so the installer uses the remembered personal scope.
+- Project scope in the home folder is refused with a clear message, because it would overwrite the personal scope file.
+- `--scope personal` run from the home folder no longer deletes the personal scope file it just saved.
+- Add home-folder cases to both installer end-to-end tests.
+
 ## 4.0.0 — Required role workflow (2026-11-24)
 
 - Add securitycode as a separate security reviewer with Claude Code and Codex model and effort settings.

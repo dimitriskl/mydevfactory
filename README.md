@@ -15,7 +15,7 @@ Upgrading from `engineering-judgment` or 3.4? See the [migration note](#manual-i
 
 ## 30-second start
 
-Run the installer from your **local project folder**. Choose **project** when prompted to install the skill and all [agents](#agents-use-mine-or-map-your-own) there and create `.mydevfactory.json`. The folder can be a plain directory. You can install without a GitHub account or a Git repository in the project.
+Run the installer from your **local project folder**. Choose **project** when prompted to install the skill and all [agents](#agents-use-mine-or-map-your-own) there and create `.mydevfactory.json`. The folder can be a plain directory. You can install without a GitHub account or a Git repository in the project. Running from your home folder is fine for a **personal** install; project scope needs a project folder.
 
 Install Git and [Node.js 22.20 or later](https://nodejs.org) first. The Bash command also needs `curl`.
 
