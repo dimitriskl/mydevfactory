@@ -21,13 +21,13 @@ Install Git and [Node.js 22.20 or later](https://nodejs.org) first. The Bash com
 
 ```bash
 # Linux and macOS
-ref=9cba64430643ca37726589ce7cafe1840fa96a2c
+ref=v4.0.2
 curl -fsSL "https://raw.githubusercontent.com/dimitriskl/mydevfactory/$ref/install/install.sh" | bash -s -- --ref "$ref"
 ```
 
 ```powershell
 # Windows (PowerShell)
-$env:EJ_REF = '9cba64430643ca37726589ce7cafe1840fa96a2c'
+$env:EJ_REF = 'v4.0.2'
 irm "https://raw.githubusercontent.com/dimitriskl/mydevfactory/$env:EJ_REF/install/install.ps1" | iex
 ```
 
@@ -41,14 +41,14 @@ Prefer to read the script first? Download a separate checkout of MyDevFactory, t
 
 ```bash
 git clone https://github.com/dimitriskl/mydevfactory.git ~/src/mydevfactory
-git -C ~/src/mydevfactory checkout --detach 9cba64430643ca37726589ce7cafe1840fa96a2c
+git -C ~/src/mydevfactory checkout --detach v4.0.2
 cd /path/to/your/project
-bash ~/src/mydevfactory/install/install.sh --ref 9cba64430643ca37726589ce7cafe1840fa96a2c
+bash ~/src/mydevfactory/install/install.sh --ref v4.0.2
 ```
 
 On Windows, run the checked-out `install/install.ps1` from your project folder with `EJ_REF` set as in the PowerShell quick start.
 
-The quick start pins the skill to a full commit SHA and uses that commit's [`install/pins.txt`](install/pins.txt) to select the agents. An installer run from a checkout uses the skill and agent pins in the checkout's manifest by default. To select a specific skill version, pass `--ref` with a tag or full commit SHA, or set `EJ_REF`.
+The quick start selects a specific release and uses that release's [`install/pins.txt`](install/pins.txt) to select the agents. An installer run from a checkout uses the skill and agent pins in the checkout's manifest by default. To select a specific skill version, pass `--ref` with a tag or full commit SHA, or set `EJ_REF`.
 
 - **First run** asks once: **personal** (all your projects: `~/.agents`, `~/.claude`, `~/.codex`) or **project** (only the current folder). With no terminal, personal is the default.
 - **Personal scope is remembered for your user** (`~/.engineering-judgment/install-scope`). **Project scope is remembered only in that folder** (`<project>/.engineering-judgment/install-scope`). A project install does not affect later runs in other folders. The `.engineering-judgment` folder keeps the project's earlier name on purpose, so existing installs keep their settings.
@@ -398,7 +398,7 @@ Example (macOS/Linux):
 
 ```bash
 git clone https://github.com/dimitriskl/mydevfactory.git
-git -C mydevfactory checkout --detach 9cba64430643ca37726589ce7cafe1840fa96a2c
+git -C mydevfactory checkout --detach v4.0.2
 mkdir -p YourProject/.agents/skills
 cp -R mydevfactory/skills/mydevfactory YourProject/.agents/skills/
 ```
@@ -407,7 +407,7 @@ Example (PowerShell):
 
 ```powershell
 git clone https://github.com/dimitriskl/mydevfactory.git
-git -C mydevfactory checkout --detach 9cba64430643ca37726589ce7cafe1840fa96a2c
+git -C mydevfactory checkout --detach v4.0.2
 New-Item -ItemType Directory -Force C:\src\YourProject\.claude\skills | Out-Null
 Copy-Item -Recurse .\mydevfactory\skills\mydevfactory C:\src\YourProject\.claude\skills\
 ```
@@ -423,12 +423,12 @@ Check [CHANGELOG.md](CHANGELOG.md) first. A new major version (for example 2.x â
 **If you installed with the MyDevFactory installer**, update the skill **and all pinned agents** using the matching updater from your project folder. The updater requires Git and Node.js 22.20 or later.
 
 ```powershell
-$env:EJ_REF = '9cba64430643ca37726589ce7cafe1840fa96a2c'
+$env:EJ_REF = 'v4.0.2'
 irm "https://raw.githubusercontent.com/dimitriskl/mydevfactory/$env:EJ_REF/install/update.ps1" | iex
 ```
 
 ```bash
-ref=9cba64430643ca37726589ce7cafe1840fa96a2c
+ref=v4.0.2
 curl -fsSL "https://raw.githubusercontent.com/dimitriskl/mydevfactory/$ref/install/update.sh" | bash -s -- --ref "$ref"
 ```
 
@@ -452,7 +452,7 @@ macOS / Linux:
 
 ```bash
 git -C mydevfactory fetch --tags
-git -C mydevfactory checkout --detach 9cba64430643ca37726589ce7cafe1840fa96a2c
+git -C mydevfactory checkout --detach v4.0.2
 rm -rf YourProject/.agents/skills/mydevfactory
 cp -R mydevfactory/skills/mydevfactory YourProject/.agents/skills/
 ```
@@ -461,7 +461,7 @@ PowerShell:
 
 ```powershell
 git -C .\mydevfactory fetch --tags
-git -C .\mydevfactory checkout --detach 9cba64430643ca37726589ce7cafe1840fa96a2c
+git -C .\mydevfactory checkout --detach v4.0.2
 Remove-Item -Recurse -Force C:\src\YourProject\.claude\skills\mydevfactory
 Copy-Item -Recurse .\mydevfactory\skills\mydevfactory C:\src\YourProject\.claude\skills\
 ```
