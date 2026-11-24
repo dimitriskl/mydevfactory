@@ -44,6 +44,10 @@ Break the PRD into thin **vertical slice** files using `templates/slice.md`:
 
 - Each slice is a narrow but complete path through every layer it needs (schema, API, UI, tests), demoable or verifiable on its own.
 - Prefer many thin slices over few thick ones.
+- **Size each part for one agent run.** A part delivers one behavior and changes about five production files or fewer, plus their tests. If a part needs more, split the slice. Large parts make developer runs long and expensive and produce diffs that take several review rounds.
+- **Measure before you build.** When a slice's value depends on a measurement (a benchmark, an evaluation, an A/B comparison), plan a cheap measurement or spike slice first, with a written keep/drop rule (for example "keep only if the median improves by 20%"). Plan the full build only after it passes. Do not plan a full build, review and QA cycle for something that may be reverted.
+- **Write criteria a reviewer can decide.** Each acceptance criterion is precise enough that a reviewer or QA can tell a blocking failure from a follow-up. Avoid open-ended words ("clean", "robust", "fast") without a measurable check; they invite endless review rounds.
+- **Give fast and full test commands.** For each part, give a targeted command for iterating (one test project or filter) and the full suite command that proves "passed".
 - Number in dependency order (`001`, `002`, …). `Blocked by:` lists real blockers only, so independent slices can run in parallel.
 - No overlapping **Owned files** between slices that are not linked by `Blocked by`.
 - Set `Risk:` per slice (L2 for auth, money, personal data, migrations, retries/idempotency, concurrency).

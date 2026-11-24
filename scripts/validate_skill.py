@@ -92,6 +92,8 @@ REQUIRED["skills/mydevfactory/references/handoff-contract.md"] += ["git status -
 REQUIRED["skills/mydevfactory/references/kanban-protocol.md"] += ["## Review rounds", "`blocking` or `follow-up`", "fix range"]
 REQUIRED["skills/mydevfactory/templates/slice.md"] += ["reviewed <base>..<sha>", "Follow-ups (do not fail a part)"]
 REQUIRED["skills/mydevfactory/SKILL.md"] += ["blocking finding"]
+# Slices stay cheap: one-run parts, measure before building, decidable criteria.
+REQUIRED["skills/mydevfactory/references/analyst-playbook.md"] += ["Size each part for one agent run", "Measure before you build", "Write criteria a reviewer can decide"]
 # Questions to the developer show their position and the total, e.g. "Question 4/10".
 REQUIRED["skills/mydevfactory/references/kanban-protocol.md"] += ["Question n/N"]
 REQUIRED["skills/mydevfactory/references/analyst-playbook.md"] += ["Question n/N"]

@@ -6,6 +6,7 @@
 - Run every configured role on small, regular, and deadline changes. Missing and blank roles skip only their own steps.
 - Verify role evidence before marking work complete.
 - Empty role models use tier defaults (Sonnet for developers and QA, Opus for analyst, reviewer and securitycode) instead of silently inheriting the session model.
+- Analyst sizes each part for one agent run, plans a measurement slice before building anything whose value depends on one, and writes acceptance criteria a reviewer can decide.
 - Cut review loops: only blocking findings fail a part, round 1 reports every blocking finding, and later rounds check only the previous findings and the fix range.
 
 ## 3.5.1 — Updater cleanup and validation hardening (2026-11-17)
