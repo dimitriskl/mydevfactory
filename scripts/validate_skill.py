@@ -128,6 +128,8 @@ REQUIRED["skills/mydevfactory/SKILL.md"] += [
     "model.claude", "effort.codex", "host: Claude Code | Codex", "CLAUDECODE",
     "`reviewer: opus high`", "asks once", "▶ Now working: <role> [<model>, <effort>]",
 ]
+# Empty model values use tier defaults; specialists never silently inherit the session model.
+REQUIRED["skills/mydevfactory/SKILL.md"] += ["Tier defaults, never silent inheritance", "backend and frontend `sonnet` · `medium`", "qa `sonnet` · `low`"]
 REQUIRED["README.md"] += ['"claude": "opus"', '"codex": "gpt-6.1-sol"', '"codex": "gpt-6.1-terra"', "`reviewer: opus high`"]
 # The mode was renamed from "Guide me" to "Walkthrough"; the old name may appear only as an alias.
 REQUIRED["skills/mydevfactory/SKILL.md"] += ["formerly `Guide me`"]
