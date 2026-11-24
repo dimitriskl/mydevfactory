@@ -88,6 +88,10 @@ REQUIRED["skills/mydevfactory/references/kanban-protocol.md"] += [
 REQUIRED["skills/mydevfactory/references/walkthrough.md"] += ["· open", "· done", "Base:"]
 REQUIRED["skills/mydevfactory/SKILL.md"] += ["before dispatching the analyst", "Evidence:"]
 REQUIRED["skills/mydevfactory/references/handoff-contract.md"] += ["git status --porcelain"]
+# Review rounds: only blocking findings fail; later rounds check only the fix range.
+REQUIRED["skills/mydevfactory/references/kanban-protocol.md"] += ["## Review rounds", "`blocking` or `follow-up`", "fix range"]
+REQUIRED["skills/mydevfactory/templates/slice.md"] += ["reviewed <base>..<sha>", "Follow-ups (do not fail a part)"]
+REQUIRED["skills/mydevfactory/SKILL.md"] += ["blocking finding"]
 # Questions to the developer show their position and the total, e.g. "Question 4/10".
 REQUIRED["skills/mydevfactory/references/kanban-protocol.md"] += ["Question n/N"]
 REQUIRED["skills/mydevfactory/references/analyst-playbook.md"] += ["Question n/N"]

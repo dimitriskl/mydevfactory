@@ -69,7 +69,7 @@ Every run is a **fresh agent**. Never rely on conversation history, because Code
 
 - **Analyst:** the request, the developer's answers so far, domain docs, relevant code paths. Do the work in `references/analyst-playbook.md`. Return the files written and the open questions, each with a recommended answer.
 - **Backend / frontend:** "Implement only your part of `<slice file>` against its Contract. Read the PRD, the slice, and any Review/QA notes and Change requests addressed to your part. Set your part to `Developing`; when every test command passed, fill your part's `Evidence:` block (`command | exit code | key output`) and set it to `Developed`. Add one History line. If you need a file outside your Owned files, stop and return a question instead of editing it. Return: changed files, the same evidence, assumptions, questions. Do not commit or stage."
-- **Reviewer:** "Review the diff `<range>` for `<slice file>` against its Contract and acceptance criteria. Edit only this slice file: verdict, Review notes, History. Write PASS or FAIL per part, with `severity | file:line | failure scenario | what must be done`, and what the green checks don't prove."
+- **Reviewer:** "Review the diff `<range>` for `<slice file>` against its Contract and acceptance criteria. Edit only this slice file: verdict, Review notes, History. Write PASS or FAIL per part, with `severity | file:line | failure scenario | what must be done`, and what the green checks don't prove. Mark each finding `blocking` or `follow-up`; FAIL only on a blocking finding. From round 2, check only the previous findings and the fix range `<last reviewed sha>..<candidate sha>` (see the Review rounds section)."
 - **Securitycode:** "Review the candidate diff and relevant files for security. Return PASS, FAIL or NOT RUN with inspected scope, any evidence-backed findings, recommended remediation and limits. Do not edit files."
 - **QA:** "Run the build and test commands, then exercise the feature against every acceptance criterion: happy path, edge, failure, and loading/empty/error states for UI. Edit only this slice file: verdict, QA notes table, criteria with no automated test, History. Write no code."
 
@@ -87,6 +87,15 @@ Agents stop only when something is unclear and changes what gets built. A subage
 ## Retry cap
 
 `Failures: n/3` counts review FAILs, security review FAILs, QA FAILs and post-merge check failures together. On the **3rd** failure, set `Blocked: needs clarification`, summarise the three rounds for the developer, and wait.
+
+## Review rounds
+
+Review → fix → re-review loops are the most expensive part of a slice, so every round must close findings, not reopen the review. These rules apply to the reviewer, securitycode and QA.
+
+- **Blocking or follow-up.** Mark every finding `blocking` or `follow-up`. A finding is **blocking** only when it has a concrete failure scenario and the change breaks the Contract or an acceptance criterion, has a correctness, security or data-loss defect, or lacks a test an acceptance criterion requires. Everything else is a **follow-up**: naming, style, wording, optional hardening, refactors, and tests beyond the criteria. A part FAILs only on a blocking finding. Follow-ups are listed in the notes, shown in the handoff, and never start a fix round.
+- **Round 1 is complete.** The first run of each role reports every blocking finding it can find, in one pass. Do not hold findings back for a later round.
+- **Later rounds check the fix, not the whole slice.** From round 2, give the agent the previous round's findings and the **fix range** `<last reviewed sha>..<candidate sha>`. It confirms each previous blocking finding is fixed and reviews only the lines in the fix range. A new blocking finding outside the fix range is allowed only for a security or data-loss defect, with a line saying why round 1 missed it. QA reruns the failed criteria and the full test commands.
+- **Record the range.** Each round's header names what was reviewed: `Round n · <agent> · reviewed <base>..<sha>`.
 
 ## Branches and commits
 

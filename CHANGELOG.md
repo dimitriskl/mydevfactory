@@ -5,6 +5,7 @@
 - Add securitycode as a separate security reviewer with Claude Code and Codex model and effort settings.
 - Run every configured role on small, regular, and deadline changes. Missing and blank roles skip only their own steps.
 - Verify role evidence before marking work complete.
+- Cut review loops: only blocking findings fail a part, round 1 reports every blocking finding, and later rounds check only the previous findings and the fix range.
 
 ## 3.5.1 — Updater cleanup and validation hardening (2026-11-17)
 

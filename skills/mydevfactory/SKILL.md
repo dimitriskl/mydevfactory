@@ -108,7 +108,7 @@ Both build against the slice's **Contract**; neither changes it silently. Within
 
 ## Phase 4: Review
 
-When all parts are `Developed`, dispatch a fresh **reviewer** if enabled with the diff range, the slice (Contract, acceptance criteria) and the PRD, not a developer's summary. The reviewer writes its own verdict into the slice file: PASS or FAIL per part, with `severity | file:line | failure scenario | what must be done`, and what the green checks don't prove. FAIL sends the failed parts back to development with the notes. The reviewer never edits code.
+When all parts are `Developed`, dispatch a fresh **reviewer** if enabled with the diff range, the slice (Contract, acceptance criteria) and the PRD, not a developer's summary. The reviewer writes its own verdict into the slice file: PASS or FAIL per part, with `severity | file:line | failure scenario | what must be done`, and what the green checks don't prove. Only a **blocking finding** fails a part; follow-ups are listed and never start a fix round. Round 2 and later check only the previous findings and the fix range (`references/kanban-protocol.md`, "Review rounds"). FAIL sends the failed parts back to development with the notes. The reviewer never edits code.
 
 ## Phase 5: Security review and QA
 

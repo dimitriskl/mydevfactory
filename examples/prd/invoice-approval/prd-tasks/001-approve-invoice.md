@@ -71,12 +71,13 @@ Part status: Developed
 
 ## Review notes
 
-Round 1 · senior-code-reviewer · FAIL
-- Backend: High · `src/Invoices/ApproveInvoiceHandler.cs:48` · audit row is saved in a second `SaveChanges`, so a crash between the two leaves an approval without audit · what must be done: write both in one transaction.
+Round 1 · senior-code-reviewer · reviewed <base>..<sha> · FAIL
+- Backend: blocking · High · `src/Invoices/ApproveInvoiceHandler.cs:48` · audit row is saved in a second `SaveChanges`, so a crash between the two leaves an approval without audit · what must be done: write both in one transaction.
 - Frontend: PASS.
+- Follow-ups (do not fail a part): `src/Invoices/ApproveInvoiceHandler.cs:30` · the handler name says "Approve" but also rejects; consider a rename later.
 
-Round 2 · senior-code-reviewer · PASS
-- Backend: audit row now saved in the same transaction (`ApproveInvoiceHandler.cs:42-51`). Green tests do not prove behavior under database failover.
+Round 2 · senior-code-reviewer · reviewed <round 1 sha>..<sha> (fix range only) · PASS
+- Backend: the round 1 blocking finding is fixed; the audit row is now saved in the same transaction (`ApproveInvoiceHandler.cs:42-51`). Green tests do not prove behavior under database failover.
 
 ## Security review notes
 

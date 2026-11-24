@@ -71,11 +71,13 @@ Part status: To do
 
 <!-- Written by the reviewer agent itself. One block per round, one verdict per part. -->
 
-Round 1 · <agent>
+Round 1 · <agent> · reviewed <base>..<sha>
 - Backend: PASS | FAIL
-  - <severity> | `file:line` | <failure scenario> | <evidence> | what must be done: …
+  - blocking | <severity> | `file:line` | <failure scenario> | <evidence> | what must be done: …
 - Frontend: PASS | FAIL
+- Follow-ups (do not fail a part): …
 - Not proved by the green checks: …
+<!-- Round 2 and later: confirm each previous blocking finding is fixed and review only the fix range <last reviewed sha>..<sha>. -->
 
 ## Security review notes
 
