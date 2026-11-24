@@ -88,6 +88,12 @@ REQUIRED["skills/mydevfactory/references/kanban-protocol.md"] += [
 REQUIRED["skills/mydevfactory/references/walkthrough.md"] += ["· open", "· done", "Base:"]
 REQUIRED["skills/mydevfactory/SKILL.md"] += ["before dispatching the analyst", "Evidence:"]
 REQUIRED["skills/mydevfactory/references/handoff-contract.md"] += ["git status --porcelain"]
+# Review rounds: only blocking findings fail; later rounds check only the fix range.
+REQUIRED["skills/mydevfactory/references/kanban-protocol.md"] += ["## Review rounds", "`blocking` or `follow-up`", "fix range"]
+REQUIRED["skills/mydevfactory/templates/slice.md"] += ["reviewed <base>..<sha>", "Follow-ups (do not fail a part)"]
+REQUIRED["skills/mydevfactory/SKILL.md"] += ["blocking finding"]
+# Slices stay cheap: one-run parts, measure before building, decidable criteria.
+REQUIRED["skills/mydevfactory/references/analyst-playbook.md"] += ["Size each part for one agent run", "Measure before you build", "Write criteria a reviewer can decide"]
 # Questions to the developer show their position and the total, e.g. "Question 4/10".
 REQUIRED["skills/mydevfactory/references/kanban-protocol.md"] += ["Question n/N"]
 REQUIRED["skills/mydevfactory/references/analyst-playbook.md"] += ["Question n/N"]
@@ -124,6 +130,8 @@ REQUIRED["skills/mydevfactory/SKILL.md"] += [
     "model.claude", "effort.codex", "host: Claude Code | Codex", "CLAUDECODE",
     "`reviewer: opus high`", "asks once", "▶ Now working: <role> [<model>, <effort>]",
 ]
+# Empty model values use tier defaults; specialists never silently inherit the session model.
+REQUIRED["skills/mydevfactory/SKILL.md"] += ["Tier defaults, never silent inheritance", "backend and frontend `sonnet` · `medium`", "qa `sonnet` · `low`"]
 REQUIRED["README.md"] += ['"claude": "opus"', '"codex": "gpt-6.1-sol"', '"codex": "gpt-6.1-terra"', "`reviewer: opus high`"]
 # The mode was renamed from "Guide me" to "Walkthrough"; the old name may appear only as an alias.
 REQUIRED["skills/mydevfactory/SKILL.md"] += ["formerly `Guide me`"]

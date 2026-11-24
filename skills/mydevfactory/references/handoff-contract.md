@@ -28,7 +28,7 @@ Do not commit, push, merge, deploy, or overwrite unrelated changes.
 
 Give the reviewer the diff range, the **original changed files**, the slice file (Contract, acceptance criteria) and the PRD, not a developer's summary.
 
-- **Writes its own verdict into the slice file**: PASS or FAIL per part, then findings in severity order (`severity | file:line | failure scenario | evidence | what must be done`), implicit assumptions and scope changes, and what the passing tests do and do **not** establish. Also one History line.
+- **Writes its own verdict into the slice file**: PASS or FAIL per part, then findings in severity order (`severity | file:line | failure scenario | evidence | what must be done`), each marked `blocking` or `follow-up` (only blocking findings fail a part; from round 2, review only the previous findings and the fix range, see `kanban-protocol.md`, "Review rounds"), implicit assumptions and scope changes, and what the passing tests do and do **not** establish. Also one History line.
 - **Never** edits source code, tests, or any file other than the slice file.
 
 ## Independent security review request
