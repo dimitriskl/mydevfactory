@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.0.2 — Smaller agent handoffs (2026-11-24)
+
+- Start fresh Codex specialists with a scoped handoff when the host supports isolated context. Resolve missing role settings with the configured tier defaults.
+- In Fix mode, record read-only analyst, review and QA responses on the task card with their authors.
+- Pin the C# developer to v1.2.1. It can reuse a successful check when the command, scope and inputs match, and reruns relevant tests after formatting changes source.
+
 ## 4.0.1 — Installer runs from the home folder (2026-11-24)
 
 - Running the installer or updater from your home folder no longer stops with "Project scope file … must contain project, not 'personal'". In the home folder, the folder's scope file is the personal one, so the installer uses the remembered personal scope.

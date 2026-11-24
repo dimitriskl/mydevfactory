@@ -165,7 +165,7 @@ If you stop halfway, open a new session and continue from the files: `Use mydevf
 
 Invoke the installed skill as `/mydevfactory` in Claude Code or `$mydevfactory` in Codex. Start a new session after installation so the agent discovers it.
 
-The CLI and agent availability vary by environment. **Installation does not guarantee auto-activation**. Explicitly invoke `mydevfactory` for consequential tasks.
+The CLI and agent availability vary by environment. **Installation does not guarantee auto-activation**. Explicitly invoke `mydevfactory` for consequential tasks. Fresh Codex agents receive a scoped handoff without inherited conversation history when the host supports it. In Fix mode, the analyst, reviewer and QA can return their evidence read-only for the orchestrator to record in the task card.
 
 ## What it does
 

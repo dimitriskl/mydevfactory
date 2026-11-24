@@ -66,7 +66,7 @@ REQUIRED = {
         "Change request by", "approved without viewing steps", "## Sign-off", "ACCEPT", "REJECT",
     ],
     "skills/mydevfactory/SKILL.md": [
-        'version: "4.0.1"', "human-on-the-loop", "`Walkthrough`", "references/kanban-protocol.md",
+        'version: "4.0.2"', "human-on-the-loop", "`Walkthrough`", "references/kanban-protocol.md",
         "references/analyst-playbook.md", "references/walkthrough.md", "templates/prd.md",
         "templates/slice.md", "fresh agent", "Developer sign-off", "only in Drill",
     ],
