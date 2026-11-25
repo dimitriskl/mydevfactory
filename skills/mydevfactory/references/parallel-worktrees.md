@@ -13,14 +13,22 @@ Compare each proposed slice with every other slice in the batch and every active
 
 ## Create and dispatch
 
+### Choose the worktree folder
+
+When you decide to create worktrees, ask once for the batch before creating any worktree, temporary branch or parent folder. Use the orchestrator speaker label and the **🟥 REPLY REQUIRED** format. Say which slices will run together and ask **Which absolute folder should I use for these worktrees?** Use examples that match the host, such as `C:\worktrees` or `D:\worktrees` on Windows. Wait for the developer's path. A path they already gave for the batch or explicitly chose for the rest of the board counts as the answer. When resuming an existing worktree, use its recorded path.
+
+Check that the chosen folder is an absolute path outside existing checkouts and that the host allows writes there. Resolve symlinks and Windows junctions before checking containment. Create the parent folder if it is missing and its location is writable. If the path is invalid or unavailable, explain the blocker and ask for another folder. Offer serial work if the developer prefers it. Use the chosen folder for every new worktree in the batch, including those belonging to other repositories.
+
+### Create the worktrees
+
 1. Use one persistent **main worktree per repository**. It holds the local integration branch, normally `feature/<prd-name>`, or the existing feature branch recorded for that repository. The main worktree is a checkout used for integration. Never target the Git branch named `main` or another protected branch for automatic promotion. Include the board repository if separate. Verify that target branches and paths are correct and protect existing staged, changed and untracked user files. A user-kept untracked configuration file can remain in the main worktree with explicit agreement. Keep it out of commits and use the trusted configuration snapshot when dispatching.
-2. In the same durable local run record used for trusted workflow inputs, record each slice's repository roots, integration branches, base SHAs, temporary worktree paths and branches, acceptance, integration and cleanup progress. Keep the record outside agent write scopes, at a known location available on resume. Record the plan before creating worktrees. In each affected repository, including the one that owns the slice card, create one temporary branch and worktree for that slice from the recorded integration SHA:
+2. In the same durable local run record used for trusted workflow inputs, record the developer's chosen parent folder and its scope, plus each slice's repository roots, integration branches, base SHAs, temporary worktree paths and branches, acceptance, integration and cleanup progress. Keep the record outside agent write scopes, at a known location available on resume. Record the plan before creating worktrees. In each affected repository, including the one that owns the slice card, create one temporary branch and worktree for that slice from the recorded integration SHA:
 
    ```sh
    git -C "<main-worktree>" worktree add --no-track -b "mydevfactory/<prd-name>/<slice-id>" "<slice-worktree>" "<base-sha>"
    ```
 
-   Use an unused absolute path in a writable location outside existing worktrees. Check `git worktree list --porcelain` and the branch ref before creating it. Reuse a matching recorded worktree on resume. If setup fails partway, preserve and reconcile existing worktrees, and keep the affected slice serial or blocked until isolated work is possible. Never force-create over another checkout or branch.
+   Set `<slice-worktree>` to an unused child path inside the chosen parent, for example `D:\worktrees\SmartWebApi-smarttreestats-apps-018`. Use a distinct child name for each repository and slice. Check `git worktree list --porcelain`, the child path and the branch ref before creating it. Reuse a matching recorded worktree on resume. If setup fails partway, preserve and reconcile existing worktrees, and keep the affected slice serial or blocked until isolated work is possible. Never force-create over another checkout or branch.
 3. Dispatch one fresh agent at a time per slice, concurrently across slices. Give each agent its exact worktree paths, and set its working directory when the host supports it. Require all edit and test commands to stay in the assigned worktrees and isolated test resources. Give it the slice card, PRD pointer, trusted role configuration, owned files by repository and required checks. The orchestrator owns staging, commits and integration. Capture and compare the dispatch snapshot separately in every worktree the agent can write to, including the card's worktree. Check scope before accepting the result. If an agent discovers a new overlapping file, dependency or shared resource, pause affected work and reassess before widening scope or integrating. Preserve existing edits.
 
 ## Accept, verify and integrate

@@ -2,7 +2,7 @@
 name: mydevfactory
 description: Orchestrate AI-assisted software development across any stack as a file-based kanban — an analyst writes a PRD and implementable slices under prd/, fresh developer, reviewer, security and QA agents move each slice to Completed, and the developer signs off after a guided walkthrough. Risk-scaled, evidence-based, works in Claude Code and Codex CLI. Use for features, bugs, PRs, audits, walkthroughs and deadline-driven delivery.
 metadata:
-  version: "4.2.0"
+  version: "4.2.1"
 ---
 
 # MyDevFactory — Development Orchestrator
@@ -27,6 +27,7 @@ This workflow is **human-on-the-loop**: the orchestrator drives the work, and th
 
 - answers to open questions (asked in chat, one at a time, numbered `Question n/N` with the total, each with a recommended answer, and saved to the PRD or slice file);
 - escalations after 3 failed rounds on a slice;
+- the parent folder for new parallel worktrees;
 - any instruction to work serially, and acceptance of L2 slices or slices they choose to review;
 - the **Developer sign-off** (ACCEPT / REJECT) after the Walkthrough;
 - merging into `main`, pushing and releasing. The workflow never does these.
@@ -87,7 +88,7 @@ For Full feature, before dispatching the analyst, create or switch to `feature/<
 Follow `references/kanban-protocol.md` exactly: statuses, the transition table, who writes what, fresh-agent prompts, questions, the retry cap, branches and commits, parallel worktrees, after-merge checks, resume, and verdict enforcement. In short:
 
 1. Make sure you are on `feature/<prd-name>` (created before the analyst ran).
-2. Pick **ready** slices whose dependencies are accepted and integrated. When at least two can build and verify independently, choose a batch and dispatch agents concurrently in separate worktrees using `references/parallel-worktrees.md`. A request to implement or continue the board authorizes this within its scope. Honor serial-only instructions. Run serially if independence or isolation is uncertain.
+2. Pick **ready** slices whose dependencies are accepted and integrated. When at least two can build and verify independently, choose a batch, ask the developer where to create the worktrees, and wait for the path. Follow `references/parallel-worktrees.md` to create the worktrees under that folder and dispatch agents concurrently. Honor serial-only instructions. Run serially if independence or isolation is uncertain.
 3. Capture the pre-dispatch file contents with `scripts/dispatch_snapshot.py` as described in the kanban protocol, dispatch the column's agent fresh, wait, read the slice file and check evidence and change scope against the snapshot using file lists and gate results; inspect source only when needed to resolve a specific uncertainty, then move the slice by the transition table and commit `<slice-id> <column>: <result>`.
 4. Integrate accepted slices one at a time and clean up their temporary branches and worktrees. Reassess the remaining board when dependencies clear, scope changes or an agent slot opens. Continue with independent work while a slice awaits a decision.
 

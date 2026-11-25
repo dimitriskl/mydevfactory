@@ -110,7 +110,7 @@ Review → fix → re-review loops are the most expensive part of a slice, so ev
 
 ## Parallel worktrees
 
-Within a slice, the **parts run one after another** in role order (backend, then frontend). Follow `parallel-worktrees.md` to select ready, independent slices, create isolated worktrees and dispatch their agents concurrently. This is the orchestrator's decision within the authorized scope. Keep the PRD `Slices` index current in the main worktree. The isolated slice file is the source of truth for that slice until integration succeeds.
+Within a slice, the **parts run one after another** in role order (backend, then frontend). Follow `parallel-worktrees.md` to select ready, independent slices, ask the developer for the parent folder, create isolated worktrees there and dispatch their agents concurrently. The orchestrator decides which slices can run in parallel within the authorized scope. Keep the PRD `Slices` index current in the main worktree. The isolated slice file is the source of truth for that slice until integration succeeds.
 
 ## After merge
 

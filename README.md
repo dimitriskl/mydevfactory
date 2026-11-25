@@ -1,12 +1,10 @@
-# MyDevFactory · Latest release v4.2.0
+# MyDevFactory · Latest release v4.2.1
 
 [Install](#30-second-start) · [Update an existing installation](#updating-the-skill) · [Full changelog](CHANGELOG.md)
 
-## What's new in v4.2.0
+## What's new in v4.2.1
 
-- The orchestrator runs independent slices in parallel Git worktrees when their files, contracts, and test resources allow it.
-- Accepted slices are tested together before merging into the main worktree. The orchestrator removes merged temporary worktrees and branches.
-- **🟥 REPLY REQUIRED** identifies a question or approval that needs your response.
+- Choose the parent folder for new parallel worktrees when the orchestrator asks. It creates one subfolder per repository and slice under your chosen path.
 
 ## About MyDevFactory
 
@@ -31,13 +29,13 @@ Install Git and [Node.js 22.20 or later](https://nodejs.org) first. The Bash com
 
 ```bash
 # Linux and macOS
-ref=e3071e1653f64bc94abe6e7784364da9cb5e9748
+ref=a911a0ce9c72eb2e3d74ee477b2f9807bb7e958c
 curl -fsSL "https://raw.githubusercontent.com/dimitriskl/mydevfactory/$ref/install/install.sh" | bash -s -- --ref "$ref"
 ```
 
 ```powershell
 # Windows (PowerShell)
-$env:EJ_REF = 'e3071e1653f64bc94abe6e7784364da9cb5e9748'
+$env:EJ_REF = 'a911a0ce9c72eb2e3d74ee477b2f9807bb7e958c'
 irm "https://raw.githubusercontent.com/dimitriskl/mydevfactory/$env:EJ_REF/install/install.ps1" | iex
 ```
 
@@ -51,9 +49,9 @@ Prefer to read the script first? Download a separate checkout of MyDevFactory, t
 
 ```bash
 git clone https://github.com/dimitriskl/mydevfactory.git ~/src/mydevfactory
-git -C ~/src/mydevfactory checkout --detach e3071e1653f64bc94abe6e7784364da9cb5e9748
+git -C ~/src/mydevfactory checkout --detach a911a0ce9c72eb2e3d74ee477b2f9807bb7e958c
 cd /path/to/your/project
-bash ~/src/mydevfactory/install/install.sh --ref e3071e1653f64bc94abe6e7784364da9cb5e9748
+bash ~/src/mydevfactory/install/install.sh --ref a911a0ce9c72eb2e3d74ee477b2f9807bb7e958c
 ```
 
 On Windows, run the checked-out `install/install.ps1` from your project folder with `EJ_REF` set as in the PowerShell quick start.
@@ -99,7 +97,7 @@ Ask me only what is unclear, then finish with the Walkthrough so I can walk thro
 yes, use the recommended answer
 ```
 
-**3. Let the orchestrator schedule the work.** It runs ready slices in separate Git worktrees when their files, contracts and test resources allow independent work. To keep a run serial, say so in your request.
+**3. Let the orchestrator schedule the work.** It runs ready slices in separate Git worktrees when their files, contracts and test resources allow independent work. When it decides to create worktrees, reply with an absolute parent folder such as `C:\worktrees` or `D:\worktrees`. To keep a run serial, say so in your request.
 
 ```text
 Run this feature serially.
@@ -319,7 +317,7 @@ Each slice moves through a kanban, and every step runs in a **fresh agent** that
 
 At the end, the **Walkthrough** shows a numbered list of the major changes in the order the code runs, one step at a time (`file:line`, what, why, proof). Type `next`, `back`, `go N`, `ask …`, `change …` (saved as an `open` change request and sent back to the developer) or `approve all`. ACCEPT is only possible when every slice is Completed and no change request is still open. Your decision is recorded as the **Developer sign-off** in the PRD: ACCEPT or REJECT, with your git name, date and commit. See the [example PRD folder](examples/prd/invoice-approval/).
 
-You own the answers to open questions, escalations and sign-off. You control merges into the Git branch named `main`, pushes and releases.
+You choose where new worktrees go and handle open questions, escalations and sign-off. You control merges into the Git branch named `main`, pushes and releases.
 
 ## Agents: use mine or map your own
 
@@ -417,7 +415,7 @@ Example (macOS/Linux):
 
 ```bash
 git clone https://github.com/dimitriskl/mydevfactory.git
-git -C mydevfactory checkout --detach e3071e1653f64bc94abe6e7784364da9cb5e9748
+git -C mydevfactory checkout --detach a911a0ce9c72eb2e3d74ee477b2f9807bb7e958c
 mkdir -p YourProject/.agents/skills
 cp -R mydevfactory/skills/mydevfactory YourProject/.agents/skills/
 ```
@@ -426,7 +424,7 @@ Example (PowerShell):
 
 ```powershell
 git clone https://github.com/dimitriskl/mydevfactory.git
-git -C mydevfactory checkout --detach e3071e1653f64bc94abe6e7784364da9cb5e9748
+git -C mydevfactory checkout --detach a911a0ce9c72eb2e3d74ee477b2f9807bb7e958c
 New-Item -ItemType Directory -Force C:\src\YourProject\.claude\skills | Out-Null
 Copy-Item -Recurse .\mydevfactory\skills\mydevfactory C:\src\YourProject\.claude\skills\
 ```
@@ -442,12 +440,12 @@ Check [CHANGELOG.md](CHANGELOG.md) first. A new major version (for example 2.x �
 **If you installed with the MyDevFactory installer**, update the skill **and all pinned agents** using the matching updater from your project folder. The updater requires Git and Node.js 22.20 or later.
 
 ```powershell
-$env:EJ_REF = 'e3071e1653f64bc94abe6e7784364da9cb5e9748'
+$env:EJ_REF = 'a911a0ce9c72eb2e3d74ee477b2f9807bb7e958c'
 irm "https://raw.githubusercontent.com/dimitriskl/mydevfactory/$env:EJ_REF/install/update.ps1" | iex
 ```
 
 ```bash
-ref=e3071e1653f64bc94abe6e7784364da9cb5e9748
+ref=a911a0ce9c72eb2e3d74ee477b2f9807bb7e958c
 curl -fsSL "https://raw.githubusercontent.com/dimitriskl/mydevfactory/$ref/install/update.sh" | bash -s -- --ref "$ref"
 ```
 
@@ -473,7 +471,7 @@ macOS / Linux:
 
 ```bash
 git -C mydevfactory fetch --tags
-git -C mydevfactory checkout --detach e3071e1653f64bc94abe6e7784364da9cb5e9748
+git -C mydevfactory checkout --detach a911a0ce9c72eb2e3d74ee477b2f9807bb7e958c
 rm -rf YourProject/.agents/skills/mydevfactory
 cp -R mydevfactory/skills/mydevfactory YourProject/.agents/skills/
 ```
@@ -482,7 +480,7 @@ PowerShell:
 
 ```powershell
 git -C .\mydevfactory fetch --tags
-git -C .\mydevfactory checkout --detach e3071e1653f64bc94abe6e7784364da9cb5e9748
+git -C .\mydevfactory checkout --detach a911a0ce9c72eb2e3d74ee477b2f9807bb7e958c
 Remove-Item -Recurse -Force C:\src\YourProject\.claude\skills\mydevfactory
 Copy-Item -Recurse .\mydevfactory\skills\mydevfactory C:\src\YourProject\.claude\skills\
 ```
