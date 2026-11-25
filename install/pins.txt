@@ -4,7 +4,7 @@
 # Do not put a branch or a tag here. To try a hub branch or tag, pass --ref or set EJ_REF.
 # How to bump a pin and tag a release: CONTRIBUTING.md.
 
-hub mydevfactory 3f1ff7b47dd02da2b22d5d45847c1d013041383f
+hub mydevfactory e3071e1653f64bc94abe6e7784364da9cb5e9748
 agent requirements-analyst 22fc5f08865b6a77c25668f0c55daac8d73a4ab7
 agent csharp-expert-developer 3f7317eb398fd3a94247b9c93dc6932199a917f4
 agent angular-typescript-developer 4d99a1e6bd46bf46e923d6ad25aebbad7af67395
