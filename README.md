@@ -1,4 +1,14 @@
-# MyDevFactory
+# MyDevFactory · Latest release v4.2.0
+
+[Install](#30-second-start) · [Update an existing installation](#updating-the-skill) · [Full changelog](CHANGELOG.md)
+
+## What's new in v4.2.0
+
+- The orchestrator runs independent slices in parallel Git worktrees when their files, contracts, and test resources allow it.
+- Accepted slices are tested together before merging into the main worktree. The orchestrator removes merged temporary worktrees and branches.
+- **🟥 REPLY REQUIRED** identifies a question or approval that needs your response.
+
+## About MyDevFactory
 
 **Ship AI-assisted code you can explain, verify, and stand behind.**
 
@@ -444,6 +454,8 @@ curl -fsSL "https://raw.githubusercontent.com/dimitriskl/mydevfactory/$ref/insta
 If you have a separate MyDevFactory checkout, run its `install/update.sh` or `install/update.ps1` by path from your project folder and pass the same ref as above. The updater runs the installer again and reuses the saved personal scope, or the project scope remembered in the current folder. If you used project scope before 3.5.0, that choice was saved for every folder; run once with `--scope project` in the project you want (or `--scope personal`). To select a scope, set `$env:EJ_SCOPE = 'personal'` or `'project'` in PowerShell, or use `--scope project`. Changed agent files are backed up as `<file>.bak-YYYYMMDD-HHMMSS` (UTC) and older backups are kept. Existing configuration and auto-compact values are preserved. In project scope, the updater copies legacy `.engineering-workflow.json` to `.mydevfactory.json` when the new file is absent. It also installs missing skill and agent files.
 
 The installer records the installed skill repository and resolved commit in `.engineering-judgment/skill-pin.json` under the chosen scope. Use the installer or updater above to update this skill: generic `skills update` does not track its temporary checkout. The receipt describes the last successful skill installation; it does not verify later local edits.
+
+To check your installed version, compare `metadata.version` in the active installation's `SKILL.md` with the latest release at the top of this README.
 
 **If you installed directly with `npx skills add` (not the MyDevFactory installer)** (Node.js 22.20 or later), use the Agent Skills CLI to check or update the skill only. These commands do **not** update the agent definitions installed by the MyDevFactory installer:
 
