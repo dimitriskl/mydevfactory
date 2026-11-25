@@ -17,6 +17,7 @@ Thanks for improving an open skill for engineering accountability.
 4. Verify `SKILL.md` frontmatter and links. If your change affects examples, mark hypothetical output as illustrative.
 5. Include a **before / after prompt and observable evidence** where possible.
 6. Protect private code, tokens, customer information, and incident details.
+7. Add a short release note at the top of `README.md` in the same PR. Use the target version for the change. If it is still in development, add it under `## What's new in vX.Y.Z (unreleased)`, above the latest released notes. Keep the first line on the latest installable version until the release is ready.
 
 ## Pull request checklist
 
@@ -26,6 +27,7 @@ Thanks for improving an open skill for engineering accountability.
 - [ ] Urgent work uses shorter checks and keeps every gate required by the selected route.
 - [ ] Changes do not weaken explicit human approval for irreversible actions.
 - [ ] Added files and instructions are documented in README.
+- [ ] The README release notes show what this change adds or fixes under its target version.
 
 ## Community
 
@@ -43,7 +45,7 @@ The installer checks out the resolved hub commit before passing its local tree t
 
 The config rename requires a release pin to a commit containing the updated skill: historical pins contain a skill that still reads the legacy filename. Complete the post-merge pin bump before releasing this rename. The installer can retrieve defaults from older pins, but that does not update the old skill.
 
-To release the hub, merge the change, then set the hub line in `install/pins.txt` to that merge commit, commit the pin bump, and tag **the pin-bump commit** (for example `v3.5.0`). A commit can't pin itself, so tagging the merge would still install the previous skill. Pin the README commands to an existing release tag or a verified full commit SHA. Do not point public install commands at `main`. When an agent release merges, replace that agent's SHA with its release commit.
+For a hub release, align `VERSION`, `skills/mydevfactory/SKILL.md` metadata and the changelog with the release version. Set the hub line in `install/pins.txt` to the verified source commit for that version and commit the pin bump. A commit cannot pin itself, so use a separate source commit. Tag the pin-bump commit (for example `v3.5.0`). In the same pin update, put the release version on the first line of `README.md`, remove its unreleased label and check that the install and update commands point to an existing release tag or verified full commit SHA for that version. Keep public install commands pinned. When an agent release merges, replace that agent's SHA with its release commit.
 
 `--ref` and `EJ_REF` accept a tag, a full commit SHA, or a branch. A branch or tag is resolved to a commit SHA before download, including a branch name that contains a slash. The user README recommends a tag or a full SHA.
 

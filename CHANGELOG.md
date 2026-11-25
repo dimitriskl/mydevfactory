@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.2.0 — Parallel worktrees and clearer prompts (2026-11-25)
+
+- Schedule independent slices in parallel Git worktrees. Verify the combined candidate before merging it into the main worktree, then remove its temporary worktrees and branches.
+- Use a red **REPLY REQUIRED** label for questions and approvals that need a response.
+- Show the latest installable version and its changes at the top of the README. Require pull requests to update those notes.
+
 ## 4.1.0 — Risk-based routes (2026-11-25)
 
 - Route contained fixes through the owning developer and reviewer, with regression evidence.

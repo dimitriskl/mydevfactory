@@ -1,4 +1,14 @@
-# MyDevFactory
+# MyDevFactory · Latest release v4.2.0
+
+[Install](#30-second-start) · [Update an existing installation](#updating-the-skill) · [Full changelog](CHANGELOG.md)
+
+## What's new in v4.2.0
+
+- The orchestrator runs independent slices in parallel Git worktrees when their files, contracts, and test resources allow it.
+- Accepted slices are tested together before merging into the main worktree. The orchestrator removes merged temporary worktrees and branches.
+- **🟥 REPLY REQUIRED** identifies a question or approval that needs your response.
+
+## About MyDevFactory
 
 **Ship AI-assisted code you can explain, verify, and stand behind.**
 
@@ -21,13 +31,13 @@ Install Git and [Node.js 22.20 or later](https://nodejs.org) first. The Bash com
 
 ```bash
 # Linux and macOS
-ref=3f1ff7b47dd02da2b22d5d45847c1d013041383f
+ref=e3071e1653f64bc94abe6e7784364da9cb5e9748
 curl -fsSL "https://raw.githubusercontent.com/dimitriskl/mydevfactory/$ref/install/install.sh" | bash -s -- --ref "$ref"
 ```
 
 ```powershell
 # Windows (PowerShell)
-$env:EJ_REF = '3f1ff7b47dd02da2b22d5d45847c1d013041383f'
+$env:EJ_REF = 'e3071e1653f64bc94abe6e7784364da9cb5e9748'
 irm "https://raw.githubusercontent.com/dimitriskl/mydevfactory/$env:EJ_REF/install/install.ps1" | iex
 ```
 
@@ -41,9 +51,9 @@ Prefer to read the script first? Download a separate checkout of MyDevFactory, t
 
 ```bash
 git clone https://github.com/dimitriskl/mydevfactory.git ~/src/mydevfactory
-git -C ~/src/mydevfactory checkout --detach 3f1ff7b47dd02da2b22d5d45847c1d013041383f
+git -C ~/src/mydevfactory checkout --detach e3071e1653f64bc94abe6e7784364da9cb5e9748
 cd /path/to/your/project
-bash ~/src/mydevfactory/install/install.sh --ref 3f1ff7b47dd02da2b22d5d45847c1d013041383f
+bash ~/src/mydevfactory/install/install.sh --ref e3071e1653f64bc94abe6e7784364da9cb5e9748
 ```
 
 On Windows, run the checked-out `install/install.ps1` from your project folder with `EJ_REF` set as in the PowerShell quick start.
@@ -407,7 +417,7 @@ Example (macOS/Linux):
 
 ```bash
 git clone https://github.com/dimitriskl/mydevfactory.git
-git -C mydevfactory checkout --detach 3f1ff7b47dd02da2b22d5d45847c1d013041383f
+git -C mydevfactory checkout --detach e3071e1653f64bc94abe6e7784364da9cb5e9748
 mkdir -p YourProject/.agents/skills
 cp -R mydevfactory/skills/mydevfactory YourProject/.agents/skills/
 ```
@@ -416,7 +426,7 @@ Example (PowerShell):
 
 ```powershell
 git clone https://github.com/dimitriskl/mydevfactory.git
-git -C mydevfactory checkout --detach 3f1ff7b47dd02da2b22d5d45847c1d013041383f
+git -C mydevfactory checkout --detach e3071e1653f64bc94abe6e7784364da9cb5e9748
 New-Item -ItemType Directory -Force C:\src\YourProject\.claude\skills | Out-Null
 Copy-Item -Recurse .\mydevfactory\skills\mydevfactory C:\src\YourProject\.claude\skills\
 ```
@@ -432,18 +442,20 @@ Check [CHANGELOG.md](CHANGELOG.md) first. A new major version (for example 2.x �
 **If you installed with the MyDevFactory installer**, update the skill **and all pinned agents** using the matching updater from your project folder. The updater requires Git and Node.js 22.20 or later.
 
 ```powershell
-$env:EJ_REF = '3f1ff7b47dd02da2b22d5d45847c1d013041383f'
+$env:EJ_REF = 'e3071e1653f64bc94abe6e7784364da9cb5e9748'
 irm "https://raw.githubusercontent.com/dimitriskl/mydevfactory/$env:EJ_REF/install/update.ps1" | iex
 ```
 
 ```bash
-ref=3f1ff7b47dd02da2b22d5d45847c1d013041383f
+ref=e3071e1653f64bc94abe6e7784364da9cb5e9748
 curl -fsSL "https://raw.githubusercontent.com/dimitriskl/mydevfactory/$ref/install/update.sh" | bash -s -- --ref "$ref"
 ```
 
 If you have a separate MyDevFactory checkout, run its `install/update.sh` or `install/update.ps1` by path from your project folder and pass the same ref as above. The updater runs the installer again and reuses the saved personal scope, or the project scope remembered in the current folder. If you used project scope before 3.5.0, that choice was saved for every folder; run once with `--scope project` in the project you want (or `--scope personal`). To select a scope, set `$env:EJ_SCOPE = 'personal'` or `'project'` in PowerShell, or use `--scope project`. Changed agent files are backed up as `<file>.bak-YYYYMMDD-HHMMSS` (UTC) and older backups are kept. Existing configuration and auto-compact values are preserved. In project scope, the updater copies legacy `.engineering-workflow.json` to `.mydevfactory.json` when the new file is absent. It also installs missing skill and agent files.
 
 The installer records the installed skill repository and resolved commit in `.engineering-judgment/skill-pin.json` under the chosen scope. Use the installer or updater above to update this skill: generic `skills update` does not track its temporary checkout. The receipt describes the last successful skill installation; it does not verify later local edits.
+
+To check your installed version, compare `metadata.version` in the active installation's `SKILL.md` with the latest release at the top of this README.
 
 **If you installed directly with `npx skills add` (not the MyDevFactory installer)** (Node.js 22.20 or later), use the Agent Skills CLI to check or update the skill only. These commands do **not** update the agent definitions installed by the MyDevFactory installer:
 
@@ -461,7 +473,7 @@ macOS / Linux:
 
 ```bash
 git -C mydevfactory fetch --tags
-git -C mydevfactory checkout --detach 3f1ff7b47dd02da2b22d5d45847c1d013041383f
+git -C mydevfactory checkout --detach e3071e1653f64bc94abe6e7784364da9cb5e9748
 rm -rf YourProject/.agents/skills/mydevfactory
 cp -R mydevfactory/skills/mydevfactory YourProject/.agents/skills/
 ```
@@ -470,7 +482,7 @@ PowerShell:
 
 ```powershell
 git -C .\mydevfactory fetch --tags
-git -C .\mydevfactory checkout --detach 3f1ff7b47dd02da2b22d5d45847c1d013041383f
+git -C .\mydevfactory checkout --detach e3071e1653f64bc94abe6e7784364da9cb5e9748
 Remove-Item -Recurse -Force C:\src\YourProject\.claude\skills\mydevfactory
 Copy-Item -Recurse .\mydevfactory\skills\mydevfactory C:\src\YourProject\.claude\skills\
 ```

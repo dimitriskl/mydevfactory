@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Validate core Agent Skills structure and local resource references without dependencies."""
+import os
 import pathlib
 import re
+import subprocess
 import sys
 
 root = pathlib.Path(__file__).resolve().parents[1]
@@ -66,7 +68,7 @@ REQUIRED = {
         "Change request by", "approved without viewing steps", "## Sign-off", "ACCEPT", "REJECT",
     ],
     "skills/mydevfactory/SKILL.md": [
-        'version: "4.1.0"', "human-on-the-loop", "`Walkthrough`", "references/kanban-protocol.md",
+        "human-on-the-loop", "`Walkthrough`", "references/kanban-protocol.md",
         "references/analyst-playbook.md", "references/walkthrough.md", "templates/prd.md",
         "templates/slice.md", "fresh agent", "Developer sign-off", "only in Drill",
     ],
@@ -232,6 +234,25 @@ else:
         changelog_path = root / "CHANGELOG.md"
         if changelog_path.is_file() and f"## {version} " not in changelog_path.read_text(encoding="utf-8"):
             errors.append("CHANGELOG.md has no heading for VERSION")
+        readme_path = root / "README.md"
+        if readme_path.is_file():
+            readme = readme_path.read_text(encoding="utf-8")
+            boundary = "\n## About MyDevFactory\n"
+            release_notes, separator, _ = readme.partition(boundary)
+            if readme.partition("\n")[0] != f"# MyDevFactory · Latest release v{version}":
+                errors.append("README.md must show VERSION as the latest release on its first line")
+            if not separator or f"## What's new in v{version}" not in release_notes.splitlines():
+                errors.append("README.md must show notes for the latest release before About MyDevFactory")
+            base_ref = os.environ.get("MYDEVFACTORY_README_BASE")
+            if base_ref:
+                base_readme = subprocess.run(
+                    ["git", "show", f"{base_ref}:README.md"], cwd=root,
+                    capture_output=True, encoding="utf-8",
+                )
+                if base_readme.returncode != 0:
+                    errors.append("Could not read README.md from the pull request base")
+                elif release_notes == base_readme.stdout.partition(boundary)[0]:
+                    errors.append("Update the release notes at the top of README.md for this pull request")
 pins_path = root / "install/pins.txt"
 agents_path = root / "install/agents.txt"
 hub = None
