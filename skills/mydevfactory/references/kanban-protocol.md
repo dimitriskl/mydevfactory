@@ -80,7 +80,7 @@ If a mapped reviewer or QA agent can't write files, the orchestrator records its
 Agents stop only when something is unclear and changes what gets built. A subagent can't talk to the developer, so it **returns** its questions. The orchestrator then:
 
 1. Sets the slice to `Blocked: needs clarification` and writes `Blocked from: <previous status> · question: <ref>` in its header (for the analyst, the question's `Blocks` column names the affected slices).
-2. Asks the developer **in chat, one question at a time**, with the recommended answer. Each question starts with the agent that raised it (with its color marker, see SKILL.md), then its position and the total: `<color> <role> [<model>, <effort>] (<agent name>) · Question n/N` (for example `🟣 analyst [opus, high] (requirements-analyst) · Question 4/10`), where N counts every open question in the current batch. If an answer raises new questions, N grows; say so (`Question 5/12 — 2 new questions from your last answer`).
+2. Asks the developer **in chat, one question at a time**, with the recommended answer. Start the message with **🟥 REPLY REQUIRED** on its own line. Attribute the question to the agent that raised it using `<color> <role> [<model>, <effort>] (<agent name>) · Question n/N`. Bold the question itself. Count every question in the current batch in N. If an answer raises new questions, update the total and say how many were added.
 3. Records the question and answer: analyst questions in the PRD `Open questions & answers`, all others in the slice `Questions & answers`.
 4. Restores the status in `Blocked from:`, clears that line, and dispatches a fresh agent.
 

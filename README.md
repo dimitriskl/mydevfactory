@@ -83,7 +83,7 @@ Add two-factor authentication (2FA) to login: after the password, the user enter
 Ask me only what is unclear, then finish with the Walkthrough so I can walk through the changes and sign off.
 ```
 
-**2. Answer the questions**, one at a time (`🟣 analyst [opus, high] (requirements-analyst) · Question 1/4: …`). Reply with your answer, or accept the recommended one:
+**2. Answer the questions** when you see **🟥 REPLY REQUIRED**. The orchestrator asks one question at a time and shows who raised it. Reply with your answer, or accept the recommended one.
 
 ```text
 yes, use the recommended answer
@@ -228,7 +228,7 @@ Ship checks the contract, the evidence, rollback and monitoring, then asks you f
 
 ### Who is working right now
 
-The skill prints a line each time an agent starts or finishes, and shows which roles are disabled in the project configuration. Every message also starts with **who is speaking**, and each role has its own color marker, so you never have to guess which agent wrote a paragraph. The brackets show the model and effort that run actually used, for example `🟣 analyst [opus, high] (requirements-analyst):`:
+The skill prints a line each time an agent starts or finishes and shows which roles are disabled. Each role has a color marker and a speaker label. The brackets show the model and effort that run actually used, for example `🟣 analyst [opus, high] (requirements-analyst):`.
 
 | Marker | Role |
 | --- | --- |
@@ -246,12 +246,19 @@ The skill prints a line each time an agent starts or finishes, and shows which r
 🟣 ▶ Now working: analyst [opus, high] (requirements-analyst) · PRD invoice-approval · subagent `analyst_prd` started
 🟣 ✓ Done: analyst [opus, high] (requirements-analyst) · 5 stories, 2 open questions
 🟣 analyst [opus, high] (requirements-analyst): The plan adds one shared protection key, so all API instances can read the stored secrets.
-🟣 analyst [opus, high] (requirements-analyst) · Question 1/2: Should the key survive a restart? Recommended: yes, stored outside the app folder.
 🔵 ▶ Now working: backend [sonnet, medium] (csharp-expert-developer) · slice 001 · subagent `backend_s001` started
 🔵 ✓ Done: backend [sonnet, medium] (csharp-expert-developer) · 3 files, dotnet test PASS
 🔴 ▶ Now working: securitycode [opus, high] (securitycode) · review · subagent `securitycode_s001` started
 ⚪ orchestrator [sonnet, medium]: Slice 001 is in security review.
 ```
+
+When the orchestrator needs your answer, it sends a separate message with a red square and a text label.
+
+> 🟥 **REPLY REQUIRED**
+>
+> 🟣 analyst [opus, high] (requirements-analyst) · Question 1/2 · **Should the key survive a restart?**
+>
+> Recommended answer is yes. Store the key outside the app folder.
 
 The markers are plain emoji, so they show the same in Claude Code and Codex CLI. Each subagent run gets a readable name (`<role>_<slice>`). When Codex prints its own line, such as "Interacted with `/root/backend_s001`", the line just before it (`🔵 ▶ Now working: backend [sonnet, medium] (csharp-expert-developer) · slice 001 · subagent `backend_s001` started`) tells you which agent that is. Lines the host tool prints itself (such as "Waiting for agents") come from the tool, not the skill, and have no marker.
 
