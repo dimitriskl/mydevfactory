@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.1.0 — Risk-based routes (2026-11-25)
+
+- Route contained fixes through the owning developer and reviewer, with regression evidence.
+- Reject unknown role names and validate route requirements before dispatch and completion.
+- Preserve pre-dispatch file snapshots, allow newly discovered blocking findings, and verify the invoice example in CI.
+
 ## 4.0.2 — Smaller agent handoffs (2026-11-24)
 
 - Start fresh Codex specialists with a scoped handoff when the host supports isolated context. Resolve missing role settings with the configured tier defaults.

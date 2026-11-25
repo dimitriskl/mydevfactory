@@ -1,10 +1,11 @@
 # Slice 001 — approve-invoice
 
-*Illustrative example; not a real project.*
+*Illustrative run using the repository's default .mydevfactory.json. The candidate tree ID `e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1`, commit IDs, and all results below are fictional.*
 
 Slice: 001
 PRD: [../invoice-approval.md](../invoice-approval.md)
 Risk: L2
+Route: full | Approval changes permissions, money and concurrent writes across the API and UI.
 Status: Completed
 Blocked by: None
 Blocked from: —
@@ -67,7 +68,7 @@ Part status: Developed
 
 | # | Asked by | Question | Recommended answer | Developer answer | Date |
 | --- | --- | --- | --- | --- | --- |
-| 1 | frontend (ui-ux-developer) | Refresh the whole list or only the row after a 409? | Only the row, to keep the user's scroll position | Only the row | 2026-11-04 |
+| 1 | frontend (angular-typescript-developer) | Refresh the whole list or only the row after a 409? | Only the row, to keep the user's scroll position | Only the row | 2026-11-04 |
 
 ## Review notes
 
@@ -76,12 +77,12 @@ Round 1 · senior-code-reviewer · reviewed <base>..<sha> · FAIL
 - Frontend: PASS.
 - Follow-ups (do not fail a part): `src/Invoices/ApproveInvoiceHandler.cs:30` · the handler name says "Approve" but also rejects; consider a rename later.
 
-Round 2 · senior-code-reviewer · reviewed <round 1 sha>..<sha> (fix range only) · PASS
+Round 2 · senior-code-reviewer · reviewed <round 1 sha>..<sha> (transaction fix and affected callers) · PASS
 - Backend: the round 1 blocking finding is fixed; the audit row is now saved in the same transaction (`ApproveInvoiceHandler.cs:42-51`). Green tests do not prove behavior under database failover.
 
 ## Security review notes
 
-<!-- Record securitycode verdict, scope, evidence, findings, remediation and review limits. -->
+PASS. The example reviewer traced the endpoint's Approver policy through the handler and the transaction that writes the audit row. No blocking finding in the inspected diff. Deployment identity settings remain outside this review.
 
 ## QA notes
 
@@ -109,15 +110,22 @@ Criteria with no automated test: none
 
 | Role | Agent | Result | Revision | Evidence |
 | --- | --- | --- | --- | --- |
+| analyst | requirements-analyst | PASS | e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1 | Contract and acceptance criteria |
+| backend | csharp-expert-developer | PASS | e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1 | Backend part, 7 regression checks passed |
+| frontend | angular-typescript-developer | PASS | e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1 | Frontend part, 5 component checks passed |
+| reviewer | senior-code-reviewer | PASS | e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1 | Review notes, round 2 closed the transaction finding |
+| securitycode | securitycode | PASS | e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1 | Security review notes, Approver policy and transaction |
+| qa | qa-automation-engineer | PASS | e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1 | QA notes, four acceptance criteria passed |
 
 ## History
 
 - 2026-11-04 | analyst (requirements-analyst) | created slice | To do
 - 2026-11-04 | backend (csharp-expert-developer) | implemented part | Developed — 7/7 tests pass
-- 2026-11-04 | frontend (ui-ux-developer) | implemented part | Developed — 5/5 tests pass
+- 2026-11-04 | frontend (angular-typescript-developer) | implemented part | Developed — 5/5 tests pass
 - 2026-11-04 | reviewer (senior-code-reviewer) | review round 1 | FAIL — audit row not in same transaction
 - 2026-11-04 | backend (csharp-expert-developer) | fixed review finding | Developed — 7/7 tests pass
 - 2026-11-04 | reviewer (senior-code-reviewer) | review round 2 | PASS
+- 2026-11-04 | securitycode (securitycode) | inspected the revised endpoint and transaction | PASS
 - 2026-11-04 | qa (qa-automation-engineer) | QA round 1 | PASS — 4/4 criteria
 - 2026-11-04 | orchestrator | merged into feature/invoice-approval, integration check | PASS
 - 2026-11-04 | orchestrator | Walkthrough + L2 sign-off | ACCEPT

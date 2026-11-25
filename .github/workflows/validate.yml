@@ -12,10 +12,13 @@ jobs:
       - uses: actions/checkout@v4
       - name: Validate skill structure and references
         run: python3 scripts/validate_skill.py
-      - name: Validator missing-file regressions
-        run: python3 -m unittest discover -s tests -p "test_validate_skill.py" -v
-      - name: Workflow evidence regressions
-        run: python3 -m unittest discover -s tests -p "test_check_workflow.py" -v
+      - name: Run workflow and validator regression tests
+        run: python3 -m unittest discover -s tests -v
+      - name: Verify the completed invoice example
+        run: >-
+          python3 skills/mydevfactory/scripts/check_workflow.py --config .mydevfactory.json
+          --route full --card examples/prd/invoice-approval/prd-tasks/001-approve-invoice.md
+          --revision e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1
   installer-linux:
     runs-on: ubuntu-latest
     permissions:

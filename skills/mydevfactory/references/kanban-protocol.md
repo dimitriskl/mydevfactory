@@ -69,11 +69,11 @@ Every run is a **fresh agent**. Never rely on conversation history, because Code
 
 - **Analyst:** the request, the developer's answers so far, domain docs, relevant code paths. Do the work in `references/analyst-playbook.md`. Return the files written and the open questions, each with a recommended answer.
 - **Backend / frontend:** "Implement only your part of `<slice file>` against its Contract. Read the slice Contract and relevant Review/QA notes and Change requests addressed to your part; consult the PRD or other referenced files when more context is needed. Set your part to `Developing`; when every test command passed, fill your part's `Evidence:` block (`command | exit code | key output`) and set it to `Developed`. Add one History line. If you need a file outside your Owned files, stop and return a question instead of editing it. Return: changed files, concise evidence references, assumptions, questions. Do not commit or stage."
-- **Reviewer:** "Review the diff `<range>` for `<slice file>` against its Contract and acceptance criteria. Edit only this slice file: verdict, Review notes, History. Write PASS or FAIL per part, with `severity | file:line | failure scenario | what must be done`, and what the green checks don't prove. Mark each finding `blocking` or `follow-up`; FAIL only on a blocking finding. From round 2, check only the previous findings and the fix range `<last reviewed sha>..<candidate sha>` (see the Review rounds section)."
+- **Reviewer:** "Review the diff `<range>` for `<slice file>` against its Contract and acceptance criteria. Edit only this slice file: verdict, Review notes, History. Write PASS or FAIL per part, with `severity | file:line | failure scenario | what must be done`, and what the green checks don't prove. Mark each finding `blocking` or `follow-up`; FAIL only on a blocking finding. From round 2, start with the previous findings, affected callers and the fix range `<last reviewed sha>..<candidate sha>`. Report newly demonstrated blocking defects wherever found (see the Review rounds section)."
 - **Securitycode:** "Review the candidate diff and relevant files for security. Return PASS, FAIL or NOT RUN with inspected scope, any evidence-backed findings, recommended remediation and limits. Do not edit files."
 - **QA:** "Run the build and test commands, then exercise the feature against every acceptance criterion: happy path, edge, failure, and loading/empty/error states for UI. Edit only this slice file: verdict, QA notes table, criteria with no automated test, History. Write no code."
 
-If a mapped reviewer or QA agent can't write files, the orchestrator records its returned verdict verbatim, labelled `Verdict by <agent>, recorded by orchestrator`. For Fix, dispatch the enabled analyst read-only to return intent, criteria, checks and questions; dispatch reviewer and QA read-only to return their complete verdicts and evidence. The orchestrator records these verbatim in the task card with their authors. Do not ask them to create `prd/` or write the card unless their definitions explicitly permit it; adapt the prompts above accordingly.
+If a mapped reviewer or QA agent can't write files, the orchestrator records its returned verdict verbatim, labelled `Verdict by <agent>, recorded by orchestrator`. For Fix, apply the selected route to these prompts. Dispatch a selected analyst read-only to return intent, criteria, checks and questions; dispatch reviewer and QA read-only to return their complete verdicts and evidence. The orchestrator records these verbatim in the task card with their authors. Do not ask them to create `prd/` or write the card unless their definitions explicitly permit it; adapt the prompts above accordingly.
 
 ## Questions
 
@@ -94,7 +94,7 @@ Review → fix → re-review loops are the most expensive part of a slice, so ev
 
 - **Blocking or follow-up.** Mark every finding `blocking` or `follow-up`. A finding is **blocking** only when it has a concrete failure scenario and the change breaks the Contract or an acceptance criterion, has a correctness, security or data-loss defect, or lacks a test an acceptance criterion requires. Everything else is a **follow-up**: naming, style, wording, optional hardening, refactors, and tests beyond the criteria. A part FAILs only on a blocking finding. Follow-ups are listed in the notes, shown in the handoff, and never start a fix round.
 - **Round 1 is complete.** The first run of each role reports every blocking finding it can find, in one pass. Do not hold findings back for a later round.
-- **Later rounds check the fix, not the whole slice.** From round 2, give the agent the previous round's findings and the **fix range** `<last reviewed sha>..<candidate sha>`. It confirms each previous blocking finding is fixed and reviews only the lines in the fix range. A new blocking finding outside the fix range is allowed only for a security or data-loss defect, with a line saying why round 1 missed it. QA reruns the failed criteria and the full test commands.
+- **Later rounds check the fix, not the whole slice.** From round 2, give the agent the previous round's findings and the **fix range** `<last reviewed sha>..<candidate sha>`. Confirm each previous blocking finding is fixed and follow the fix into affected callers. Report any evidenced blocking defect in the candidate under the same criteria as round 1, including a violated contract or invariant outside the fix range. Explain in one sentence how the later review found it. QA reruns the failed criteria and the full test commands.
 - **Record the range.** Each round's header names what was reviewed: `Round n · <agent> · reviewed <base>..<sha>`.
 
 ## Branches and commits
@@ -157,19 +157,19 @@ Keep command output small: show only the lines that prove a result (exit code, t
 
 ## Verdict enforcement
 
-**Before every dispatch**, record a snapshot: `git rev-parse HEAD` and `git status --porcelain`, and add a History line `orchestrator | dispatch <role> | base <sha>`.
+**Before every dispatch**, add the dispatch History line first. Run `python3 <skill-dir>/scripts/dispatch_snapshot.py capture` in the worktree. Keep its printed private temporary directory outside the worktree until the scope check and any correction finish. It holds HEAD, staged-content identity, and the contents and modes of dirty tracked and non-ignored untracked files. If capture fails, resolve the cause before running the agent.
 
 **After the agent returns**, compare against that snapshot:
 
-1. **HEAD must not have moved.** Agents never commit or stage. If HEAD moved, stop and ask the developer; do not reset anything yourself.
-2. **Changed paths** = `git diff --name-only <base sha>` plus new untracked files in `git status --porcelain`. Judge only paths that changed during this run, and **never revert a path that was already** modified or untracked in the snapshot.
+1. Run `python3 <skill-dir>/scripts/dispatch_snapshot.py compare <snapshot-directory>`. A changed HEAD or index blocks the verdict. Preserve the tree and inspect the discrepancy.
+2. The JSON list contains paths changed since dispatch, including additional edits to previously dirty files. An empty list means the compared worktree contents match. If a path may also have been edited concurrently, pause before attributing or undoing its changes.
 3. **Scope check:** every changed path must be allowed for the role ("Who writes what"): no path for securitycode, the slice file for reviewer and QA, the part's Owned files and their tests for developers.
-4. **Section check:** `git diff <base sha> -- <slice file>` may only touch that role's sections, and History may only gain lines at the end, never lose or rewrite them.
+4. **Section check:** for a card already dirty at dispatch, look up its numbered backup in `snapshot.json` and compare it to the live card with `git diff --no-index -- <backup> <card>` (exit 1 means differences). For a previously clean tracked card use the captured HEAD. Check that only allowed sections changed and History only gained lines at the end.
 
 On a violation:
 
-- Revert only this run's out-of-scope changes (`git checkout <base sha> -- <path>`, or delete files the run created), **including this run's edits to the slice file**, so a discarded verdict leaves no trace.
+- Discard the invalid verdict. Restore only changes attributable to the agent using the captured bytes, symlink target or absence for previously dirty paths and the captured HEAD for originally clean tracked files. Preserve staged contents. If ownership is uncertain or the file changed again, keep both versions and ask the developer. Remove the private snapshot after the comparison and any correction are complete.
 - Add a History line `orchestrator | violation | <agent> changed <files>; reverted`.
 - Allow **one corrective re-run** with a fresh agent and an explicit warning. A second violation on the same step sets `Blocked: needs clarification` and asks the developer (for example, the Owned files list may be missing a file the part really needs).
 
-Violations do not count toward `Failures:`, but they are capped as above, so no loop runs forever.
+Remove the private snapshot after a successful scope check as well. Violations do not count toward `Failures:`, but they are capped as above, so no loop runs forever.

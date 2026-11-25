@@ -186,17 +186,19 @@ The CLI and agent availability vary by environment. **Installation does not guar
 ```mermaid
 flowchart TD
   A[Your request + repository] --> B{Risk and scope?}
-  B -->|Small fix| C[Analyst: task card + acceptance checks]
-  B -->|Feature| D[Analyst: PRD + slice files in prd/]
-  D --> E[Fresh assignments to enabled developer roles]
-  C --> E
+  B -->|Copy only| C[Owner + deterministic check]
+  B -->|Contained single-layer fix| F[Owner + regression test + independent review]
+  B -->|Full feature or higher risk| D[Full route with configured specialists]
+  C -->|Pass| M
+  F -->|Pass| M
+  D --> E[Implement against the contract]
   E --> R[Reviewer: PASS / FAIL written in the slice file]
   R -->|FAIL| E
   R -->|PASS or disabled| S[Securitycode: security review]
   S -->|FAIL| E
   S -->|PASS or disabled| Q[QA: checks every acceptance criterion]
   Q -->|FAIL| E
-  Q -->|PASS or disabled, evidence checked| M[Merge slice + integration check]
+  Q -->|PASS or disabled, evidence checked| M[Verify route evidence and integrate]
   M --> G[Walkthrough: step by step]
   G --> V[Developer sign-off: ACCEPT / REJECT]
   V -->|ACCEPT| H[You merge to main and release]
@@ -220,8 +222,8 @@ Ship checks the contract, the evidence, rollback and monitoring, then asks you f
 
 **Risk levels.** Each slice gets a risk level, which sets how much process it goes through:
 
-- **L0**: wording, styles, comments or a trivial local change. Use a short check and run all configured roles.
-- **L1**: an ordinary, contained feature or bug fix. Targeted tests, review and QA.
+- **L0**: wording, comments or formatting with no behavior impact. A single-owner Fix uses one implementer and a deterministic check.
+- **L1**: a clear single-layer bug fix uses its owning developer, a regression test and an independent reviewer. Cross-layer changes, unclear scope and Full feature use the full route.
 - **L2**: authentication, money, personal data, public API contracts, destructive migrations, concurrency or production safety. Explicit invariants, failure-path tests and a separate sign-off for each slice. A deadline never lowers L2 to L0.
 
 ### Who is working right now
@@ -295,7 +297,7 @@ Each slice moves through a kanban, and every step runs in a **fresh agent** that
 - After **3 failures** on one slice (review, security review, QA or the post-merge check), the orchestrator stops and asks you. A blocked slice records `Blocked from:` so it can resume exactly where it stopped.
 - Independent slices can run **in parallel git worktrees**, only if you say yes.
 - Work happens on `feature/<prd-name>`, created before the analyst runs; the starting point is recorded as `Base:` in the PRD. Nothing is merged to `main` or pushed for you.
-- **Your own work is safe.** If you have uncommitted changes, the orchestrator asks you to stash, commit or stop before any agent runs. Before every agent run it records a snapshot (HEAD + `git status`); afterwards it checks that the agent only touched what its role allows, reverts anything else from that run only, and allows one corrective re-run before asking you.
+- **Your own work is safe.** If you have uncommitted changes, the orchestrator asks you to stash, commit or stop before any agent runs. Before every agent run it captures HEAD, staged-content identity and a private copy of already-dirty files. It checks the agent's edits against those contents and pauses if concurrent edits make attribution uncertain.
 - **Resume any time.** A new session rebuilds the board from the files and `git worktree list`; nothing depends on chat history.
 
 At the end, the **Walkthrough** shows a numbered list of the major changes in the order the code runs, one step at a time (`file:line`, what, why, proof). Type `next`, `back`, `go N`, `ask …`, `change …` (saved as an `open` change request and sent back to the developer) or `approve all`. ACCEPT is only possible when every slice is Completed and no change request is still open. Your decision is recorded as the **Developer sign-off** in the PRD: ACCEPT or REJECT, with your git name, date and commit. See the [example PRD folder](examples/prd/invoice-approval/).
@@ -378,7 +380,7 @@ Each repository's README shows how to install the agent for one project (`.claud
 
 **Upgrading an existing project?** The installer preserves your settings. If your config has no `securitycode` role, add the block shown above to enable security review. Fresh project installs include the mapping.
 
-**Using other agents?** Replace each `name` with your own agent's name. MyDevFactory runs each configured role in order for changes, including small edits and deadlines. Omit a role, set it to an empty string, or leave its name blank to skip only that step. A named agent that cannot run blocks that step. The workflow takes its role assignments from a trusted starting configuration. A branch under review cannot disable its own checks. Backend and frontend each inspect the task and record why their work is inapplicable when appropriate. QA begins after the configured code and security reviews pass. The skill checks the evidence before accepting completion. See [required roles and evidence](skills/mydevfactory/references/workflow-evidence.md).
+**Using other agents?** Replace each `name` with your own agent's name. MyDevFactory validates role names before dispatch and runs the roles required by the selected route. A deadline keeps that route's checks. Omit a role, set it to an empty string, or leave its name blank to skip only that step. A named agent that cannot run blocks that step. The workflow takes its role assignments from a trusted starting configuration. A branch under review cannot disable its own checks. On the full route both configured developers inspect applicability. A short route starts only its owning developer and, for a behavior fix, the reviewer. QA begins after the configured code and security reviews pass. The skill checks the evidence before accepting completion. See [required roles and evidence](skills/mydevfactory/references/workflow-evidence.md).
 
 Securitycode returns its verdict for the orchestrator to record. The reviewer and QA write their verdicts into the slice file themselves, so they need permission to edit files (in Codex, a `workspace-write` sandbox). The orchestrator checks that they changed nothing else. If a reviewer can't edit files, the orchestrator records its verdict word for word, labelled with the agent's name.
 

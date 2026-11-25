@@ -4,7 +4,10 @@
 
 - User outcome:
 - Existing PRD/issue/tasks (reused):
-- Risk and deadline:
+- Deadline:
+Risk: <L0, L1 or L2>
+Route: <route> | <reason>
+<!-- Short routes require this line with the observed check before integration: Route check: <command> | exit 0 | <observed result> -->
 - Required invariants:
 - Owners and callable agents:
 - Files owned and contracts:

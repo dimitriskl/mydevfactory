@@ -51,7 +51,7 @@ REQUIRED = {
         "## Folder layout", "## Statuses", "## Transition table", "## Who writes what",
         "## Fresh agent prompts", "## Questions", "## Retry cap", "## Branches and commits",
         "## Parallel worktrees", "## After merge", "## Resume", "## Verdict enforcement",
-        "Blocked: needs clarification", "git worktree list", "git diff --name-only",
+        "Blocked: needs clarification", "git worktree list", "dispatch_snapshot.py",
         "uncommitted", "feature/<prd-name>", "not in the transition table",
     ],
     "skills/mydevfactory/references/analyst-playbook.md": [
@@ -66,12 +66,12 @@ REQUIRED = {
         "Change request by", "approved without viewing steps", "## Sign-off", "ACCEPT", "REJECT",
     ],
     "skills/mydevfactory/SKILL.md": [
-        'version: "4.0.2"', "human-on-the-loop", "`Walkthrough`", "references/kanban-protocol.md",
+        'version: "4.1.0"', "human-on-the-loop", "`Walkthrough`", "references/kanban-protocol.md",
         "references/analyst-playbook.md", "references/walkthrough.md", "templates/prd.md",
         "templates/slice.md", "fresh agent", "Developer sign-off", "only in Drill",
     ],
     "skills/mydevfactory/references/handoff-contract.md": [
-        "slice file", "git diff --name-only", "recorded by orchestrator",
+        "slice file", "dispatch_snapshot.py", "recorded by orchestrator",
     ],
     "skills/mydevfactory/references/orchestration-matrix.md": ["Walkthrough", "prd/"],
     "skills/mydevfactory/references/training-drills.md": ["teach-back"],
@@ -82,13 +82,12 @@ REQUIRED = {
 REQUIRED["skills/mydevfactory/templates/slice.md"] += ["Blocked from:", "Evidence:", "- Backend:", "- Frontend:"]
 REQUIRED["skills/mydevfactory/templates/prd.md"] += ["| Blocks |", "Base:"]
 REQUIRED["skills/mydevfactory/references/kanban-protocol.md"] += [
-    "Blocked from:", "git status --porcelain", "never revert a path that was already",
+    "Blocked from:", "snapshot.json", "git diff --no-index",
     "one corrective re-run", "stash", "parts run one after another", "Evidence:",
 ]
 REQUIRED["skills/mydevfactory/references/walkthrough.md"] += ["· open", "· done", "Base:"]
 REQUIRED["skills/mydevfactory/SKILL.md"] += ["before dispatching the analyst", "Evidence:"]
-REQUIRED["skills/mydevfactory/references/handoff-contract.md"] += ["git status --porcelain"]
-# Review rounds: only blocking findings fail; later rounds check only the fix range.
+# Review rounds: only blocking findings fail; later rounds start with the fix range and affected callers.
 REQUIRED["skills/mydevfactory/references/kanban-protocol.md"] += ["## Review rounds", "`blocking` or `follow-up`", "fix range"]
 REQUIRED["skills/mydevfactory/templates/slice.md"] += ["reviewed <base>..<sha>", "Follow-ups (do not fail a part)"]
 REQUIRED["skills/mydevfactory/SKILL.md"] += ["blocking finding"]

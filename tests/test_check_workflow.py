@@ -28,7 +28,7 @@ class WorkflowEvidenceTests(unittest.TestCase):
             for role in ROLES
         }
 
-    def run_gate(self, raw_config=None):
+    def run_gate(self, raw_config=None, *, route=None, header="", plan=False):
         with tempfile.TemporaryDirectory() as temp:
             temp = Path(temp)
             config = temp / ".mydevfactory.json"
@@ -36,11 +36,12 @@ class WorkflowEvidenceTests(unittest.TestCase):
             config.write_text(
                 json.dumps(self.config) if raw_config is None else raw_config, encoding="utf-8"
             )
-            card.write_text(TABLE + "\n".join(self.rows.values()) + "\n", encoding="utf-8")
+            card.write_text(header + TABLE + "\n".join(self.rows.values()) + "\n", encoding="utf-8")
             return subprocess.run(
                 [
                     sys.executable, str(CHECKER), "--config", str(config),
-                    "--card", str(card), "--revision", REVISION,
+                    *(["--route", route] if route else []),
+                    *(["--plan"] if plan else ["--card", str(card), "--revision", REVISION]),
                 ],
                 capture_output=True, text=True, encoding="utf-8", check=False,
             )
@@ -119,6 +120,57 @@ class WorkflowEvidenceTests(unittest.TestCase):
         ):
             with self.subTest(raw=raw):
                 self.assert_blocked(message, raw)
+
+    def test_typo_rejected_before_dispatch_and_at_completion(self):
+        self.config = {"agents": {"reveiwer": {"name": "reviewer-agent"}}}
+        self.rows.clear()
+        for plan in (True, False):
+            with self.subTest(plan=plan):
+                result = self.run_gate(plan=plan)
+                self.assertEqual(result.returncode, 1)
+                self.assertIn("unknown configured role(s): reveiwer", result.stderr)
+
+    def test_short_routes_plan_and_verify_only_the_required_roles(self):
+        for layer in ("backend", "frontend"):
+            for kind, risk in (("copy", "L0"), ("fix", "L1")):
+                route = f"{kind}-{layer}"
+                roles = [layer, "reviewer"] if kind == "fix" else [layer]
+                with self.subTest(route=route):
+                    plan = self.run_gate(route=route, plan=True)
+                    self.assertEqual(plan.returncode, 0, plan.stderr)
+                    self.assertEqual(plan.stdout.strip(), f"{route}: {', '.join(roles)}")
+                    self.rows = {role: f"| {role} | {role}-agent | PASS | {REVISION} | notes |"
+                                 for role in roles}
+                    header = f"Risk: {risk}\nRoute: {route} | single layer\nRoute check: test | exit 0 | passed\n"
+                    result = self.run_gate(route=route, header=header)
+                    self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_short_fix_cannot_bypass_review_or_deterministic_check(self):
+        self.rows = {role: self.rows[role] for role in ("backend", "reviewer")}
+        route = "fix-backend"
+        header = "Risk: L1\nRoute: fix-backend | local bug\nRoute check: regression | exit 0 | passed\n"
+        for invalid, expected in (
+            (header.replace("exit 0", "exit 1"), "Route check"),
+            (header.split("Route check")[0], "Route check"),
+            (header.replace("L1", "L2"), "requires Risk: L1"),
+            (header.replace(route, "copy-backend"), "matching the trusted route"),
+        ):
+            with self.subTest(invalid=invalid):
+                result = self.run_gate(route=route, header=invalid)
+                self.assertEqual(result.returncode, 1)
+                self.assertIn(expected, result.stderr)
+        self.rows["backend"] = self.rows["backend"].replace("PASS", "NOT APPLICABLE")
+        self.assertIn("backend requires a passing result", self.run_gate(route=route, header=header).stderr)
+        self.rows["backend"] = self.rows["backend"].replace("NOT APPLICABLE", "PASS")
+        del self.rows["reviewer"]
+        self.assertIn("missing configured role evidence: reviewer", self.run_gate(route=route, header=header).stderr)
+        del self.config["agents"]["reviewer"]
+        self.assertEqual(self.run_gate(route=route, plan=True).returncode, 1)
+
+    def test_candidate_cannot_select_short_route_on_full_run(self):
+        result = self.run_gate(header="Route: copy-frontend | wording\n")
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("matching the trusted route", result.stderr)
 
 
 if __name__ == "__main__":

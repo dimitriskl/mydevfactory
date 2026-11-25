@@ -1,11 +1,11 @@
 # Routing matrix and risk levels
 
-Adapt to the current codebase. Run all configured roles for every change. Risk and use case determine depth.
+Adapt to the current codebase. Select a route before dispatch using `workflow-evidence.md`. Risk, scope and mode determine the required roles.
 
 | Situation | Discovery and planning | Implementation | Review and learning |
 | --- | --- | --- | --- |
-| L0: copy/format-only edit | Short task card | Scoped change | Enabled review, security review and QA; relevant smoke check |
-| L1: localized bug | Reproduce; short intent; existing task | Owning specialist; focused tests | Enabled review and security review; QA re-checks the bug and nearby behavior |
+| L0: copy/format-only edit | Short task card | Scoped change | Relevant deterministic check on the single-owner copy route |
+| L1: localized bug | Reproduce; short intent; existing task | Owning specialist; focused tests | Independent reviewer and targeted regression test on a single-layer fix route |
 | L1: new feature or cross-stack change | Analyst writes `prd/<prd-name>/` PRD + slice files (converts existing specs) | Board: fresh developer per part against the slice Contract | Reviewer → securitycode → QA per slice; integration check; Walkthrough sign-off |
 | L2: auth, sensitive data, migrations, retries, payments | Explicit invariants, known failure scenarios, human decision for irreversible choices | Controlled scope, safe handoffs, failure-path tests | QA covers failure paths and invariants; per-slice Walkthrough sign-off; human release gate |
 | Data/report/metric change | Analyst confirms metric definitions and expected results on known data | Owning specialist; queries and transformations under test | Analyst read-only data check with exact queries and output; reviewer |
@@ -13,7 +13,7 @@ Adapt to the current codebase. Run all configured roles for every change. Risk a
 | Walkthrough | Read diff, PRD and slices | None; change requests go back to the board | Step-by-step walkthrough, then ACCEPT / REJECT |
 | Audit only | No PRD | No implementation unless requested | Enabled reviewer and securitycode review the original diff and actual test output |
 | Drill | Use real source and current diff | No code generation until requested | Question, human answer, evidence-based feedback (the only mode with quiz questions) |
-| Deadline | Only minimal intent | Smallest shippable slice | All configured roles with one fix round; flag unverified behavior |
+| Deadline | Only minimal intent | Smallest shippable slice | Selected route with one fix round; flag unverified behavior |
 
 **Risk guide**
 

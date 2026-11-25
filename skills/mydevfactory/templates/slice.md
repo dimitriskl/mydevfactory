@@ -6,6 +6,7 @@
 Slice: <ID>
 PRD: [../<prd-name>.md](../<prd-name>.md)
 Risk: L0 | L1 | L2
+Route: full | <reason>
 Status: To do
 Blocked by: None
 Blocked from: —
@@ -77,7 +78,7 @@ Round 1 · <agent> · reviewed <base>..<sha>
 - Frontend: PASS | FAIL
 - Follow-ups (do not fail a part): …
 - Not proved by the green checks: …
-<!-- Round 2 and later: confirm each previous blocking finding is fixed and review only the fix range <last reviewed sha>..<sha>. -->
+<!-- Round 2 and later: confirm each previous blocking finding is fixed and inspect affected callers and the fix range <last reviewed sha>..<sha>. Record newly demonstrated contract or invariant violations wherever found. -->
 
 ## Security review notes
 

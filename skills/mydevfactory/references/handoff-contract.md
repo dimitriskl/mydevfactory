@@ -1,6 +1,6 @@
 # Agent delegation, review, and handoff contracts
 
-Every request goes to a **fresh agent** and is self-contained: name the role, phase, slice or task card path, relevant PRD path, allowed files, required output and exact scope. Pass file pointers and targeted instructions, not copied PRDs or repeated logs. Agents read the relevant slice contract and phase-specific notes; expand to the PRD, source or prior evidence when needed for their task. Exact prompt skeletons and the transition rules are in `kanban-protocol.md`. In Fix mode, use the task card instead of a slice file. Dispatch the enabled analyst, reviewer and QA with explicit read-only assignments: the analyst returns intent, acceptance criteria, checks and questions; reviewer and QA return their complete verdicts and evidence. The orchestrator records each response verbatim on the card, identifying its author. Never ask these roles to create `prd/` or write the Fix card unless their definitions explicitly permit it. In Audit mode use the applicable read-only contracts.
+Every request goes to a **fresh agent** and is self-contained: name the role, phase, slice or task card path, relevant PRD path, allowed files, required output and exact scope. Pass file pointers and targeted instructions, not copied PRDs or repeated logs. Agents read the relevant slice contract and phase-specific notes; expand to the PRD, source or prior evidence when needed for their task. Exact prompt skeletons and the transition rules are in `kanban-protocol.md`. In Fix mode, use the task card instead of a slice file. Give route-selected analyst, reviewer and QA agents explicit read-only assignments: the analyst returns intent, acceptance criteria, checks and questions; reviewer and QA return their complete verdicts and evidence. The orchestrator records each response verbatim on the card, identifying its author. Never ask these roles to create `prd/` or write the Fix card unless their definitions explicitly permit it. In Audit mode use the applicable read-only contracts.
 
 ## Analyst request
 
@@ -16,7 +16,7 @@ Assign one backend or frontend part, its slice file, owned files, tests and addr
 
 ## Independent reviewer request
 
-Provide the diff range, original changed files, slice Contract and criteria, and a PRD pointer, not a developer summary. The reviewer writes its own per-part verdict, severity-ordered findings (`severity | file:line | failure scenario | evidence | what must be done`), assumptions, scope changes, limits of passing tests and one History line. Mark findings `blocking` or `follow-up`; only blocking findings fail a part. Later rounds use the fix range and previous findings (`kanban-protocol.md`, "Review rounds"). Do not edit source, tests or other files.
+Provide the diff range, original changed files, slice Contract and criteria, and a PRD pointer, not a developer summary. The reviewer writes its own per-part verdict, severity-ordered findings (`severity | file:line | failure scenario | evidence | what must be done`), assumptions, scope changes, limits of passing tests and one History line. Mark findings `blocking` or `follow-up`; only blocking findings fail a part. Later rounds start with the fix range, affected callers and previous findings. Report any demonstrated acceptance or invariant violation, including one outside the fix range (`kanban-protocol.md`, "Review rounds"). Do not edit source, tests or other files.
 
 ## Independent security review request
 
@@ -28,7 +28,7 @@ Provide the slice file, changed files and exact build/test/run commands. QA runs
 
 ## Enforcing write scope
 
-Before each run, record HEAD and `git status --porcelain`. Afterwards compare `git diff --name-only <base sha>` and new untracked files with the role's allowed scope. Never touch previously dirty paths. Revert out-of-scope changes, log the violation and allow one corrective fresh run; a second violation blocks the slice and requires the developer. If reviewer or QA cannot write its verdict, record it verbatim as `Verdict by <agent>, recorded by orchestrator`. An unavailable named role blocks; only configuration-disabled roles are SKIPPED.
+Follow the kanban protocol's Verdict enforcement section. Capture the actual pre-dispatch bytes with `dispatch_snapshot.py`, compare the returned paths to the role's allowed scope and check changes to the card against its saved contents. Preserve concurrent edits. Log any violation and allow one corrective fresh run; a second violation blocks the slice and requires the developer. If reviewer or QA cannot write its verdict, record it verbatim as `Verdict by <agent>, recorded by orchestrator`. An unavailable named role required by the route blocks; only configuration-disabled roles are SKIPPED.
 
 ## Integration owner
 

@@ -9,6 +9,13 @@ import sys
 
 
 ROLES = ("analyst", "backend", "frontend", "reviewer", "securitycode", "qa")
+ROUTES = {
+    "full": ROLES,
+    "copy-backend": ("backend",),
+    "copy-frontend": ("frontend",),
+    "fix-backend": ("backend", "reviewer"),
+    "fix-frontend": ("frontend", "reviewer"),
+}
 HEADER = ["Role", "Agent", "Result", "Revision", "Evidence"]
 SECTION = "## Workflow evidence"
 
@@ -27,6 +34,9 @@ def configured_roles(path):
     agents = config.get("agents") if isinstance(config, dict) else None
     if not isinstance(agents, dict):
         raise ValueError("config must contain an agents object")
+    unknown = agents.keys() - set(ROLES)
+    if unknown:
+        raise ValueError(f"unknown configured role(s): {', '.join(sorted(unknown))}")
 
     names = {}
     for role in ROLES:
@@ -55,8 +65,7 @@ def cells(line):
     return fields
 
 
-def evidence_rows(path):
-    lines = path.read_text(encoding="utf-8-sig").splitlines()
+def evidence_rows(lines):
     headings = [index for index, line in enumerate(lines) if line.rstrip() == SECTION]
     if len(headings) != 1:
         raise ValueError(f"expected exactly one {SECTION} section")
@@ -74,7 +83,7 @@ def evidence_rows(path):
     return [cells(line) for line in section[2:]]
 
 
-def check_evidence(names, rows, revision):
+def check_evidence(names, rows, revision, route):
     seen = set()
     completed = []
     for role, agent, result, reviewed_revision, evidence in rows:
@@ -90,7 +99,9 @@ def check_evidence(names, rows, revision):
             continue
         if agent != expected_agent:
             raise ValueError(f"{role} must record configured agent {expected_agent}")
-        if result != "PASS" and not (role in ("backend", "frontend") and result == "NOT APPLICABLE"):
+        if role not in ROUTES[route]:
+            raise ValueError(f"{role} is outside route {route}")
+        if result != "PASS" and not (route == "full" and role in ("backend", "frontend") and result == "NOT APPLICABLE"):
             raise ValueError(f"{role} requires a passing result, found {result or '(empty)'}")
         if reviewed_revision != revision:
             raise ValueError(f"{role} evidence is for a different revision")
@@ -98,29 +109,65 @@ def check_evidence(names, rows, revision):
             raise ValueError(f"{role} requires evidence")
         completed.append(role)
 
-    missing = names.keys() - seen
+    required = [role for role in ROUTES[route] if role in names]
+    missing = set(required) - seen
     if missing:
         raise ValueError(f"missing configured role evidence: {', '.join(sorted(missing))}")
-    if completed != list(names):
-        raise ValueError(f"configured roles must run in order: {' → '.join(names)}")
+    if completed != required:
+        raise ValueError(f"configured roles must run in order: {' → '.join(required)}")
+
+
+def check_route_record(lines, route):
+    # Older cards had no route header and always used the full workflow.
+    recorded = [line for line in lines if line.startswith("Route:")]
+    if route == "full" and not recorded:
+        return
+    prefix = f"Route: {route} | "
+    if (len(recorded) != 1 or not recorded[0].startswith(prefix)
+            or recorded[0][len(prefix):].strip() in ("", "<reason>")):
+        raise ValueError(f"expected one 'Route: {route} | <reason>' matching the trusted route")
+    if route != "full":
+        expected_risk = "L0" if route.startswith("copy-") else "L1"
+        if [line for line in lines if line.startswith("Risk:")] != [f"Risk: {expected_risk}"]:
+            raise ValueError(f"{route} requires Risk: {expected_risk}")
+        checks = [line for line in lines if line.startswith("Route check:")]
+        fields = checks[0][len("Route check:"):].strip().rsplit(" | ", 2) if len(checks) == 1 else []
+        if (len(fields) != 3 or fields[1] != "exit 0"
+                or fields[0].strip() in ("", "<command>")
+                or fields[2].strip() in ("", "<observed result>")):
+            raise ValueError("short route requires 'Route check: <command> | exit 0 | <observed result>'")
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", required=True, type=Path)
-    parser.add_argument("--card", required=True, type=Path)
-    parser.add_argument("--revision", required=True)
+    parser.add_argument("--route", choices=ROUTES, default="full")
+    parser.add_argument("--plan", action="store_true", help="validate configuration and list dispatches before work starts")
+    parser.add_argument("--card", type=Path)
+    parser.add_argument("--revision")
     args = parser.parse_args()
 
     try:
+        names = configured_roles(args.config)
+        required = [role for role in ROUTES[args.route] if role in names]
+        if args.route != "full" and len(required) != len(ROUTES[args.route]):
+            raise ValueError(f"{args.route} requires configured {' and '.join(ROUTES[args.route])}")
+        if args.plan:
+            if args.card is not None or args.revision is not None:
+                parser.error("--plan cannot verify a card or revision")
+            print(f"{args.route}: {', '.join(required) or '(no configured roles)'}")
+            return 0
+        if args.card is None or args.revision is None:
+            parser.error("verification requires --card and --revision")
         if not args.revision.strip():
             raise ValueError("revision must not be blank")
-        names = configured_roles(args.config)
-        check_evidence(names, evidence_rows(args.card), args.revision)
+        lines = args.card.read_text(encoding="utf-8-sig").splitlines()
+        check_route_record(lines, args.route)
+        check_evidence(names, evidence_rows(lines), args.revision, args.route)
     except (OSError, ValueError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
-    print(f"OK: workflow evidence covers {len(names)} configured role(s) for {args.revision}")
+    print(f"OK: workflow evidence covers {len(required)} configured role(s) for {args.revision} ({args.route})")
     return 0
 
 
