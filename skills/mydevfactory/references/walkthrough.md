@@ -65,7 +65,7 @@ If neither holds, or the command fails once (for example, a sandbox blocks it), 
 
 ## Commands
 
-Wait for the developer after every card.
+Follow every card with a separate **🟥 REPLY REQUIRED** prompt that asks for the next command. Wait for the developer before advancing.
 
 - `map` — show the approach and code map again without advancing.
 - `next` / `back` / `go N` — move the pointer and show that card. A step you leave is marked `✓`.
@@ -80,7 +80,7 @@ When the walk ends, every slice with change requests goes back to its developer 
 
 ## Sign-off
 
-After the last step (or `approve all`), show a one-screen summary: steps viewed, change requests, and **blind spots**, meaning what the strongest checks did not prove. Then ask for the decision:
+After the last step (or `approve all`), show a one-screen summary of steps viewed, change requests, and **blind spots**, meaning what the strongest checks did not prove. Then ask for `ACCEPT` or `REJECT` in a separate **🟥 REPLY REQUIRED** message.
 
 - **ACCEPT**: the orchestrator fills in `Developer sign-off` in the PRD (and in the slice file for L2 slices) or the Fix task card and commits it on `feature/<prd-name>`.
 - **REJECT** with a reason: recorded the same way. The orchestrator asks what should happen next.

@@ -19,6 +19,8 @@ The goal is **verified value per minute, with a developer who knows what they sh
 
 Use clear, simple English or the requested language. Explain technical terms, retain precise evidence and file paths, and give agents the same guidance.
 
+**When you need a reply**, put **🟥 REPLY REQUIRED** on its own line at the start of a separate message. Follow it with the speaker label and the exact question in bold. Give the reply choices or command, if applicable. Use this format for clarification, approvals, escalations that need a decision, and Walkthrough prompts that wait for a command or sign-off. Wait for the reply before taking the dependent action. Keep status updates and optional choices outside this format. Use the words `REPLY REQUIRED` even if the interface drops the emoji or bold styling.
+
 ## Human-on-the-loop
 
 This workflow is **human-on-the-loop**: the orchestrator drives the work, and the developer steps in only where their judgment is needed. Agents never stop for routine approvals. They stop **only when something is unclear** and changes what gets built. The developer owns:
