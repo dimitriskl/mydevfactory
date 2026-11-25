@@ -1,12 +1,10 @@
-# MyDevFactory · Latest release v4.2.0
+# MyDevFactory · Latest release v4.2.1
 
 [Install](#30-second-start) · [Update an existing installation](#updating-the-skill) · [Full changelog](CHANGELOG.md)
 
-## What's new in v4.2.0
+## What's new in v4.2.1
 
-- The orchestrator runs independent slices in parallel Git worktrees when their files, contracts, and test resources allow it.
-- Accepted slices are tested together before merging into the main worktree. The orchestrator removes merged temporary worktrees and branches.
-- **🟥 REPLY REQUIRED** identifies a question or approval that needs your response.
+- Choose the parent folder for new parallel worktrees when the orchestrator asks. It creates one subfolder per repository and slice under your chosen path.
 
 ## About MyDevFactory
 
@@ -99,7 +97,7 @@ Ask me only what is unclear, then finish with the Walkthrough so I can walk thro
 yes, use the recommended answer
 ```
 
-**3. Let the orchestrator schedule the work.** It runs ready slices in separate Git worktrees when their files, contracts and test resources allow independent work. To keep a run serial, say so in your request.
+**3. Let the orchestrator schedule the work.** It runs ready slices in separate Git worktrees when their files, contracts and test resources allow independent work. When it decides to create worktrees, reply with an absolute parent folder such as `C:\worktrees` or `D:\worktrees`. To keep a run serial, say so in your request.
 
 ```text
 Run this feature serially.
@@ -319,7 +317,7 @@ Each slice moves through a kanban, and every step runs in a **fresh agent** that
 
 At the end, the **Walkthrough** shows a numbered list of the major changes in the order the code runs, one step at a time (`file:line`, what, why, proof). Type `next`, `back`, `go N`, `ask …`, `change …` (saved as an `open` change request and sent back to the developer) or `approve all`. ACCEPT is only possible when every slice is Completed and no change request is still open. Your decision is recorded as the **Developer sign-off** in the PRD: ACCEPT or REJECT, with your git name, date and commit. See the [example PRD folder](examples/prd/invoice-approval/).
 
-You own the answers to open questions, escalations and sign-off. You control merges into the Git branch named `main`, pushes and releases.
+You choose where new worktrees go and handle open questions, escalations and sign-off. You control merges into the Git branch named `main`, pushes and releases.
 
 ## Agents: use mine or map your own
 

@@ -19,6 +19,8 @@ Thanks for improving an open skill for engineering accountability.
 6. Protect private code, tokens, customer information, and incident details.
 7. Add a short release note at the top of `README.md` in the same PR. Use the target version for the change. If it is still in development, add it under `## What's new in vX.Y.Z (unreleased)`, above the latest released notes. Keep the first line on the latest installable version until the release is ready.
 
+After a release, keep only the new version's notes at the top of the README. Keep the full release history in `CHANGELOG.md`.
+
 ## Pull request checklist
 
 - [ ] Existing agents, third-party skills and documents are preserved.

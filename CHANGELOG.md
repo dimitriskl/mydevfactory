@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.2.1 — Worktree folder choice (2026-11-25)
+
+- Ask for the parent folder before creating parallel worktrees. Create a separate subfolder there for each repository and slice.
+- Keep the newest release notes in the README and the full release history in the changelog.
+
 ## 4.2.0 — Parallel worktrees and clearer prompts (2026-11-25)
 
 - Schedule independent slices in parallel Git worktrees. Verify the combined candidate before merging it into the main worktree, then remove its temporary worktrees and branches.
