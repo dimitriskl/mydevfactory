@@ -25,6 +25,8 @@ Use these exact strings.
 
 A status that is **not in the transition table** (for example, hand-edited) is invalid: stop and ask the developer what it should be. Never guess.
 
+For scheduling, `Completed` means the slice passed its workflow gates. It releases dependents only after it is accepted and the combined checks and integration have succeeded in every target repository. Track that outcome in the run record. A finished worktree on its own does not release a dependency.
+
 The orchestrator adds a History line for **every** status move it makes (`orchestrator | <from> → <to> | <reason>`), so the board can be rebuilt from the files alone.
 
 ## Transition table
@@ -59,7 +61,7 @@ Every allowed move. Any other move is invalid and the orchestrator rejects it.
 | reviewer | **only the slice file**: its verdict, `Review notes`, one History line | source code, tests, any other file |
 | securitycode | evidence report returned to orchestrator for `Security review notes` and History | all files, external systems |
 | qa | **only the slice file**: its verdict, `QA notes`, one History line | source code, tests, any other file |
-| orchestrator | slice `Status:`, `Failures:`, `Questions & answers`, `Change requests`, the PRD `Slices` index and `Developer sign-off` | production code (while a specialist is callable) |
+| orchestrator | slice `Status:`, `Failures:`, `Questions & answers`, `Change requests`, the PRD `Slices` index, integration records and `Developer sign-off` | production code (while a specialist is callable) |
 
 The orchestrator moves a slice only after checking the evidence is written in the file: the part's `Evidence:` block (`command | exit code | key output`) for `Developed`, a verdict with findings for review, security verdict with scope and limitations, and a per-criterion table for QA. Use the applicable role decisions and checker in `workflow-evidence.md`.
 
@@ -99,7 +101,7 @@ Review → fix → re-review loops are the most expensive part of a slice, so ev
 
 ## Branches and commits
 
-- **Before dispatching the analyst** (and on every resume), make sure you are on **`feature/<prd-name>`**: create it from the current branch, or switch to it if it exists. Record `Base: <branch>@<sha>` in the PRD header.
+- **Before dispatching the analyst** (and on every resume), identify the main worktree for the board and use **`feature/<prd-name>`** there. Create it from the current branch or switch to it if it exists. If it is already checked out, use that worktree. Record `Base: <branch>@<sha>` in the PRD header. For a feature spanning multiple repositories, also record each repository's main worktree and local integration branch as described in `parallel-worktrees.md`.
 - If the working tree has **uncommitted** changes at that point, ask the developer to choose: **stash** them (`git stash push -u -m mydevfactory`), **commit** them on their current branch first, or **stop**. Never start agents on top of the developer's uncommitted work.
 - If the current branch is `main`, say so in the same question; the feature branch is still created from it.
 - After each verified step, the orchestrator commits on the current work branch with the message `<prd-or-slice-id> <column>: <result>` (the analysis step included), so git history mirrors the board. Agents don't commit or stage.
@@ -108,32 +110,20 @@ Review → fix → re-review loops are the most expensive part of a slice, so ev
 
 ## Parallel worktrees
 
-Within a slice, the **parts run one after another** in role order (backend, then frontend). Parallel worktrees are reserved for independent slices.
-
-When **two or more slices are ready and independent** (no `Blocked by` link between them, and no overlapping Owned files), ask the developer whether to run them in parallel. On yes:
-
-- `git worktree add ../<repo>-<slice-id> -b feature/<prd-name>-<slice-id> feature/<prd-name>`, one worktree per slice and one agent per worktree.
-- In a worktree, **that worktree's slice file is the source of truth** for that slice until it is merged.
-- The orchestrator keeps the PRD `Slices` index current on `feature/<prd-name>`.
-- Respect the host's parallel limits (for Codex, `agents.max_concurrent_threads_per_session`).
+Within a slice, the **parts run one after another** in role order (backend, then frontend). Follow `parallel-worktrees.md` to select ready, independent slices, create isolated worktrees and dispatch their agents concurrently. This is the orchestrator's decision within the authorized scope. Keep the PRD `Slices` index current in the main worktree. The isolated slice file is the source of truth for that slice until integration succeeds.
 
 ## After merge
 
-A slice is merged into `feature/<prd-name>` only after it reaches `Completed`. Then:
-
-1. Run the build, tests and contract check on the **combined** code, and record the output.
-2. Merge conflicts go to the owning developer agent. The orchestrator does not resolve them in production code.
-3. If the merge or the check fails, the slice goes back to `In development` and the failure counts toward the retry cap.
-4. Remove the worktree (`git worktree remove`) once its branch is merged.
+For a serial slice, run the build, tests and contract checks on the **combined** code in the main worktree and record the verified revision and outcome. Apply its sign-off gate before unlocking dependencies. If the checks fail, reopen the owning parts and count the failure toward the retry cap. For a parallel slice, follow the acceptance, verification, promotion and cleanup steps in `parallel-worktrees.md`. Never report the slice as integrated before all its targets have passed.
 
 ## Resume
 
 A new session rebuilds the board from the files, never from memory:
 
 1. Read every `prd/*/prd-tasks/*.md` header (`Status:`, `Blocked by:`, `Failures:`) and each part status.
-2. Run `git worktree list`. For each worktree on a `feature/<prd-name>-<slice-id>` branch, read that worktree's copy of the slice file instead.
+2. Read the integration run record and run `git worktree list --porcelain` in each involved repository. Match temporary branches and paths to slices and use each active worktree's copy of the slice file. Reconcile pending promotions and cleanup before dispatching again. For worktrees from older runs, use the existing branch name and card to identify the slice, then verify the base, scope and evidence before registering it. Leave unrecognized worktrees and branches alone.
 3. Add the Workflow evidence section to open cards or slices that predate it. Keep older reports in the notes. Validate evidence against the trusted role map, contract, acceptance criteria and candidate. Return an open slice to the earliest required stage without valid evidence and record why in History.
-4. Report the board to the developer in one line per slice, then continue with the next ready slice.
+4. Report the board concisely, including slices awaiting acceptance, integration or cleanup. Reuse verified work and continue with the next ready batch. For older completed slices without a run record, verify the commits are present in the integration branches and check the existing sign-off and combined evidence before releasing dependents. Run missing checks against the existing code.
 
 ## Context checkpoints
 

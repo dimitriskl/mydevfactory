@@ -17,6 +17,8 @@ When the current graphical interface can render a diagram, also show a compact f
 
 Before showing anything, read the diff (for a PRD: `<Base sha>...feature/<prd-name>`, using the `Base:` line in the PRD header, never assume `main`), the PRD and the slice files. Build a numbered list of the **major** changes, meaning behavior, contracts, guards, persistence, UI states and tests that prove them. Skip formatting, renames and boilerplate.
 
+For a parallel slice awaiting acceptance, read the slice card in its worktree and use the recorded base-to-candidate diff in every repository belonging to the slice. Restrict the walkthrough to that slice's changes and evidence.
+
 Order the steps in **execution-flow order**: follow a real request from its entry point through API, service and persistence to UI, not file order. When there are several flows, walk each one in turn and name it in the list. Each step links to its slice.
 
 Show the whole list at the top of every screen. Mark the steps with `▶` for the current step, `✓` for viewed, `✎` for a change requested, and nothing for not yet viewed.
@@ -82,8 +84,8 @@ When the walk ends, every slice with change requests goes back to its developer 
 
 After the last step (or `approve all`), show a one-screen summary of steps viewed, change requests, and **blind spots**, meaning what the strongest checks did not prove. Then ask for `ACCEPT` or `REJECT` in a separate **🟥 REPLY REQUIRED** message.
 
-- **ACCEPT**: the orchestrator fills in `Developer sign-off` in the PRD (and in the slice file for L2 slices) or the Fix task card and commits it on `feature/<prd-name>`.
-- **REJECT** with a reason: recorded the same way. The orchestrator asks what should happen next.
+- **ACCEPT**: the orchestrator records `Developer sign-off` in the PRD, slice or Fix task card as appropriate. Commit a parallel slice decision in that slice's worktree and record the reviewed SHA for every repository in the run record. Commit the whole-feature decision on `feature/<prd-name>`.
+- **REJECT** with a reason: record it the same way and keep the candidate available. Ask what should happen next for that candidate. Continue independent authorized work.
 
 ```
 ## Developer sign-off
@@ -95,6 +97,6 @@ After the last step (or `approve all`), show a one-screen summary of steps viewe
 - Signed: <git user.name> · <date> · commit <sha>
 ```
 
-For a per-slice L2 sign-off, ACCEPT requires checked workflow evidence and that slice to be `Completed` and have no open change requests; other slices may still be unfinished. Record the decision in that slice, without signing off the entire PRD. For the overall PRD sign-off, ACCEPT requires checked workflow evidence for the integrated change, every slice to be `Completed` and no change request to be open. For Fix, ACCEPT requires checked workflow evidence, passing integration checks, and no open change requests on the task card. A later sign-off is appended as a new block; the latest block is the decision. `Signed:` names the reviewed HEAD commit. Merging into `main` is only **offered** after overall ACCEPT, and the developer does it.
+For per-slice sign-off (L2 or requested by the developer), ACCEPT requires checked workflow evidence, `Completed` status and no open change requests. A parallel slice needs this ACCEPT before promotion. Record the decision in that slice; other slices can still be unfinished. For overall PRD sign-off, ACCEPT requires checked workflow evidence for the integrated change, every slice accepted and integrated, and no change request open. For Fix, ACCEPT requires checked workflow evidence, passing integration checks, and no open change requests on the task card. Append any later sign-off as a new block. The latest block is the decision. `Signed:` names the reviewed HEAD commit. Merging into `main` is only **offered** after overall ACCEPT, and the developer does it.
 
 After recording a decision, make the next step explicit. On slice ACCEPT, state which slices remain and automatically continue with the next ready slice if the current request authorizes it; otherwise ask whether to continue. If the next work is blocked, explain the blocker and ask for the specific input needed. On overall ACCEPT, state that the requested implementation and sign-off are complete and offer the merge if applicable. On REJECT, ask what should happen next. For a standalone walkthrough without a board, state when the walkthrough is finished and identify any outstanding decision or action. Never end with a status-only recap when the user needs to act.

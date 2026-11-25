@@ -48,8 +48,8 @@ Break the PRD into thin **vertical slice** files using `templates/slice.md`:
 - **Measure before you build.** When a slice's value depends on a measurement (a benchmark, an evaluation, an A/B comparison), plan a cheap measurement or spike slice first, with a written keep/drop rule (for example "keep only if the median improves by 20%"). Plan the full build only after it passes. Do not plan a full build, review and QA cycle for something that may be reverted.
 - **Write criteria a reviewer can decide.** Each acceptance criterion is precise enough that a reviewer or QA can tell a blocking failure from a follow-up. Avoid open-ended words ("clean", "robust", "fast") without a measurable check; they invite endless review rounds.
 - **Give fast and full test commands.** For each part, give a targeted command for iterating (one test project or filter) and the full suite command that proves "passed".
-- Number in dependency order (`001`, `002`, …). `Blocked by:` lists real blockers only, so independent slices can run in parallel.
-- No overlapping **Owned files** between slices that are not linked by `Blocked by`.
+- Number in dependency order (`001`, `002`, …). Use `Blocked by:` for real prerequisites, including consumed contracts or schema changes that must land first. Identify shared files and test resources that require isolation or serial work.
+- Give slices proposed for parallel work disjoint **Owned files**, including tests and generated files. When the PRD spans repositories, label each path with its repository and include the cross-repository checks.
 - Set `Risk:` per slice (L2 for auth, money, personal data, migrations, retries/idempotency, concurrency).
 - A slice with an unanswered question starts as `Blocked: needs clarification`.
 
