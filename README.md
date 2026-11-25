@@ -89,10 +89,10 @@ Ask me only what is unclear, then finish with the Walkthrough so I can walk thro
 yes, use the recommended answer
 ```
 
-**3. Allow parallel work** if the skill asks (independent slices in separate worktrees), or keep it serial:
+**3. Let the orchestrator schedule the work.** It runs ready slices in separate Git worktrees when their files, contracts and test resources allow independent work. To keep a run serial, say so in your request.
 
 ```text
-yes, run 002 and 003 in parallel
+Run this feature serially.
 ```
 
 **4. Walk through the changes in the Walkthrough**, one step at a time (see [what happens in this step](#what-happens-in-the-walkthrough-step) below):
@@ -149,7 +149,7 @@ Step 2/7 · src/Auth/TwoFactorService.cs:40-58
 - **`approve all`** skips the rest; the sign-off honestly records which steps you didn't view.
 - **At the end** you see a one-screen summary: steps viewed, change requests, and **blind spots** (what the tests did not prove). Then you choose **ACCEPT** or **REJECT**. ACCEPT is only possible when every slice is Completed and no change request is still open. Your decision is written into the PRD's `Developer sign-off` with your git name, the date and the commit, then the orchestrator offers the merge; you do it.
 
-For an L2 slice (see [risk levels](#pick-a-mode)), the separate slice sign-off can be accepted while other slices are still unfinished, provided that slice is Completed and has no open change requests. Afterward, the orchestrator identifies the next ready slice and continues if already authorized, or asks whether to continue. `approve all` skips walkthrough cards; it does not itself accept the sign-off. When the requested work is finished, the handoff says so explicitly.
+For an L2 slice (see [risk levels](#pick-a-mode)), you can sign off while other slices are still unfinished. The slice needs passing workflow checks, Completed status and no open change requests. A parallel L2 slice stays in its worktree until you accept it and the combined checks pass. Its dependents become ready after integration. `approve all` skips walkthrough cards. Use `ACCEPT` to sign off.
 
 If you stop halfway, open a new session and continue from the files: `Use mydevfactory in Auto mode. Resume the board in prd/ and continue with the next ready slice.` To walk through the changes again later: `Use mydevfactory in Walkthrough mode on prd/login-2fa.`
 
@@ -302,14 +302,14 @@ Each slice moves through a kanban, and every step runs in a **fresh agent** that
 - **Securitycode** returns a separate security verdict. A FAIL returns the issue to the owning developer.
 - **QA** checks every acceptance criterion and writes PASS or FAIL; FAIL goes back to the developer.
 - After **3 failures** on one slice (review, security review, QA or the post-merge check), the orchestrator stops and asks you. A blocked slice records `Blocked from:` so it can resume exactly where it stopped.
-- Independent slices can run **in parallel git worktrees**, only if you say yes.
-- Work happens on `feature/<prd-name>`, created before the analyst runs; the starting point is recorded as `Base:` in the PRD. Nothing is merged to `main` or pushed for you.
+- The orchestrator chooses **parallel Git worktrees** for independent, ready slices and assigns one agent at a time to each slice. A slice can wait for your decision while work continues on other independent slices.
+- Each repository keeps one main worktree on its local feature branch. The orchestrator verifies the combined code before merging an accepted slice into those checkouts, then removes its temporary worktrees and branches. See the [parallel worktree workflow](skills/mydevfactory/references/parallel-worktrees.md).
 - **Your own work is safe.** If you have uncommitted changes, the orchestrator asks you to stash, commit or stop before any agent runs. Before every agent run it captures HEAD, staged-content identity and a private copy of already-dirty files. It checks the agent's edits against those contents and pauses if concurrent edits make attribution uncertain.
 - **Resume any time.** A new session rebuilds the board from the files and `git worktree list`; nothing depends on chat history.
 
 At the end, the **Walkthrough** shows a numbered list of the major changes in the order the code runs, one step at a time (`file:line`, what, why, proof). Type `next`, `back`, `go N`, `ask …`, `change …` (saved as an `open` change request and sent back to the developer) or `approve all`. ACCEPT is only possible when every slice is Completed and no change request is still open. Your decision is recorded as the **Developer sign-off** in the PRD: ACCEPT or REJECT, with your git name, date and commit. See the [example PRD folder](examples/prd/invoice-approval/).
 
-You own: answers to open questions, escalations, consent to worktrees, the sign-off, and merge/push/release.
+You own the answers to open questions, escalations and sign-off. You control merges into the Git branch named `main`, pushes and releases.
 
 ## Agents: use mine or map your own
 

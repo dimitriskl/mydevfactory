@@ -27,7 +27,7 @@ This workflow is **human-on-the-loop**: the orchestrator drives the work, and th
 
 - answers to open questions (asked in chat, one at a time, numbered `Question n/N` with the total, each with a recommended answer, and saved to the PRD or slice file);
 - escalations after 3 failed rounds on a slice;
-- consent before parallel worktrees are created;
+- any instruction to work serially, and acceptance of L2 slices or slices they choose to review;
 - the **Developer sign-off** (ACCEPT / REJECT) after the Walkthrough;
 - merging into `main`, pushing and releasing. The workflow never does these.
 
@@ -87,11 +87,11 @@ For Full feature, before dispatching the analyst, create or switch to `feature/<
 Follow `references/kanban-protocol.md` exactly: statuses, the transition table, who writes what, fresh-agent prompts, questions, the retry cap, branches and commits, parallel worktrees, after-merge checks, resume, and verdict enforcement. In short:
 
 1. Make sure you are on `feature/<prd-name>` (created before the analyst ran).
-2. Pick the next **ready** slice (not blocked, dependencies `Completed`). If two or more ready slices are independent, ask the developer whether to run them in parallel worktrees.
+2. Pick **ready** slices whose dependencies are accepted and integrated. When at least two can build and verify independently, choose a batch and dispatch agents concurrently in separate worktrees using `references/parallel-worktrees.md`. A request to implement or continue the board authorizes this within its scope. Honor serial-only instructions. Run serially if independence or isolation is uncertain.
 3. Capture the pre-dispatch file contents with `scripts/dispatch_snapshot.py` as described in the kanban protocol, dispatch the column's agent fresh, wait, read the slice file and check evidence and change scope against the snapshot using file lists and gate results; inspect source only when needed to resolve a specific uncertainty, then move the slice by the transition table and commit `<slice-id> <column>: <result>`.
-4. Repeat until every slice is `Completed` or `Blocked: needs clarification`.
+4. Integrate accepted slices one at a time and clean up their temporary branches and worktrees. Reassess the remaining board when dependencies clear, scope changes or an agent slot opens. Continue with independent work while a slice awaits a decision.
 
-After an L2 slice is signed off, resume the next ready slice automatically when the current request authorizes continuing. If the requested scope ends at that slice, report the remaining board state and ask whether to continue with the next ready slice. If blocked, state what is needed to proceed. Do not present a slice sign-off as completion of the whole feature.
+After an L2 slice is accepted, finish its integration and continue with the next ready slice when authorized. If the scope ends there, report what remains. If no eligible work can continue without a decision, state what is needed. Report slice and feature status separately.
 
 ## Phase 3: Development
 
@@ -118,11 +118,11 @@ For UI evidence requirements, see `references/handoff-contract.md`, "UI evidence
 
 ## Phase 6: Integration
 
-Run the workflow evidence checker before marking each slice ready for integration. For Fix, run the same checker on the task card before integration. Merge each `Completed` slice into `feature/<prd-name>`, then run the build, tests and contract check on the **combined** code and record the output. Separate green backend and frontend tests do **not** prove end-to-end correctness: check API compatibility, JSON naming/nullability, date/time, error codes, auth/CORS, and UI states. Merge conflicts go to the owning developer. A failure sets the owning parts back to `To do`, reopens the slice and counts toward its retry cap. If a seam can't be checked, mark it unverified.
+Run the workflow evidence checker before marking each slice ready for integration. For Fix, run the same checker on the task card before integration. Verify the build, tests and contract checks on the **combined** code, including applicable API and UI seams. For worktree slices, verify in isolation against the latest integration HEAD before fast-forwarding the main worktree. Follow the integration and failure rules in `references/parallel-worktrees.md`. For serial slices, run the combined checks on the feature branch before releasing dependents. Route failures to the owning developer and count them toward the retry cap. Record unverified seams.
 
 ## Phase 7: Developer sign-off
 
-After all slices are `Completed` and integrated, or the Fix card's workflow evidence and integration checks pass, present a short approach and code map before the step list, then run **Walkthrough** (`references/walkthrough.md`): a numbered step list of the major changes in execution-flow order, one step card at a time (`file:line`, What, Why, and the Tests written for that step with their results), with `next`, `back`, `go N`, `tests`, `ask`, `change` and `approve all`. Record change requests in the affected slices or Fix task card. Rerun the applicable development, review, security review, QA, and integration steps before sign-off. Then record the developer's ACCEPT or REJECT in **Developer sign-off** on the PRD or Fix task card (`Signed: <git user.name> · <date> · commit <sha>`) and commit it. For L2 slices, do the same per slice. No quiz questions here.
+Run a per-slice **Walkthrough** when an L2 slice has passed its workflow gates and record the developer's decision on its candidate. For a worktree slice, obtain this ACCEPT before promotion. After all slices are accepted and integrated, or the Fix card's workflow evidence and integration checks pass, present a short approach and code map before the step list, then run **Walkthrough** (`references/walkthrough.md`): a numbered step list of the major changes in execution-flow order, one step card at a time (`file:line`, What, Why, and the Tests written for that step with their results), with `next`, `back`, `go N`, `tests`, `ask`, `change` and `approve all`. Record change requests in the affected slices or Fix task card. Rerun the applicable development, review, security review, QA, and integration steps before sign-off. Then record the developer's ACCEPT or REJECT in **Developer sign-off** on the PRD or Fix task card (`Signed: <git user.name> · <date> · commit <sha>`) and commit it. No quiz questions here.
 
 ## Phase 8: Handoff
 

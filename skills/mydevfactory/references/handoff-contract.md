@@ -32,7 +32,7 @@ Follow the kanban protocol's Verdict enforcement section. Capture the actual pre
 
 ## Integration owner
 
-The orchestrator merges `Completed` slices and verifies shared API contracts, overlapping edits, build/test impact and user journeys on the combined code. Parallel writing is safe only in separate worktrees, or with clearly non-overlapping Owned files. Every finding returns to the owning developer for fixes.
+The orchestrator integrates accepted slices and verifies shared API contracts, overlapping edits, build/test impact and user journeys on the combined code. Follow `parallel-worktrees.md` for selection, isolated agent dispatch, integration and cleanup. Send findings to the owning developer for fixes.
 
 ## Final status
 
